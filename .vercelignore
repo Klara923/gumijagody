@@ -1,0 +1,16 @@
+# Lokalna konfiguracja nie może trafić do wdrożenia - zmienne produkcyjne ustawiane są
+# wyłącznie po stronie hostingu. Bez tego CLI wgrywa plik .env razem z kodem.
+.env
+.env.*
+!.env.example
+
+node_modules
+.next
+.backup
+storage
+coverage
+playwright-report
+test-results
+src/generated
+docker-compose.yml
+Dockerfile.dev

@@ -1,0 +1,12 @@
+// Model domenowy (dokument, typ dokumentu, kontrahent, kategoria, bufor) powstaje w kolejnym kroku.
+// Na tym etapie schemat definiuje wyłącznie połączenie i generator, żeby zweryfikować pełną
+// ścieżkę aplikacja -> Prisma -> PostgreSQL, lokalnie i na wdrożeniu.
+
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}

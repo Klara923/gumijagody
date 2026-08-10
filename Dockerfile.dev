@@ -1,0 +1,25 @@
+# Obraz deweloperski: `docker compose up` ma postawić komplet (baza + migracje + aplikacja)
+# jedną komendą, bez zakładania, że recenzent ma lokalnie Node w odpowiedniej wersji.
+#
+# Debian zamiast Alpine: na musl `sharp` (zależność Next.js) schodzi do wariantu wasm,
+# który ciągnie pakiety spoza lockfile'a.
+FROM node:22-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends openssl \
+  && rm -rf /var/lib/apt/lists/*
+
+COPY package.json package-lock.json ./
+
+# `npm install`, nie `npm ci`: lockfile generowany na macOS/arm64 nie zawiera opcjonalnych
+# zależności platformowych, których npm żąda na Linuksie.
+RUN npm install --no-audit --no-fund
+
+COPY . .
+
+EXPOSE 3000
+
+# Generowanie klienta i migracje przy starcie kontenera, a nie w trakcie budowania obrazu:
+# `prisma.config.ts` wymaga DATABASE_URL, który jest konfiguracją runtime, nie build-time.
+CMD ["sh", "-c", "npx prisma generate && npx prisma migrate deploy && npm run dev -- --hostname 0.0.0.0"]
