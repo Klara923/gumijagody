@@ -25,11 +25,7 @@ export default async function UploadDocumentPage({
       </p>
       {error && <p style={{ color: 'crimson' }}>{error}</p>}
 
-      <form
-        action={uploadDocumentAction}
-        encType="multipart/form-data"
-        style={{ display: 'grid', gap: '0.75rem' }}
-      >
+      <form action={uploadDocumentAction} style={{ display: 'grid', gap: '0.75rem' }}>
         <label>
           Plik (PDF lub XML)
           <input
