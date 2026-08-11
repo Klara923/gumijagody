@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server'
 import type { z } from 'zod'
 
+import { deleteDocument } from '@/server/documents/delete-document'
 import { DocumentError } from '@/server/documents/errors'
 import { getDocumentById } from '@/server/documents/get-document'
-import { updateDocument } from '@/server/documents/update-document'
 import { updateDocumentBodySchema } from '@/server/documents/schemas'
+import { updateDocument } from '@/server/documents/update-document'
 
 export const dynamic = 'force-dynamic'
 
@@ -62,6 +63,18 @@ export async function PATCH(request: Request, context: RouteContext) {
   try {
     const document = await updateDocument(id, parsed.data)
     return NextResponse.json(document)
+  } catch (error) {
+    if (error instanceof DocumentError) return documentErrorResponse(error)
+    throw error
+  }
+}
+
+export async function DELETE(_request: Request, context: RouteContext) {
+  const { id } = await context.params
+
+  try {
+    await deleteDocument(id)
+    return new NextResponse(null, { status: 204 })
   } catch (error) {
     if (error instanceof DocumentError) return documentErrorResponse(error)
     throw error
