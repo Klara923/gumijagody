@@ -1,16 +1,7 @@
 import { getPrisma } from '@/server/infrastructure/db/prisma'
-import { DocumentError } from './errors'
+import { DocumentError, isPrismaUniqueViolation } from './errors'
 import { DOCUMENT_INCLUDE, mapDocument } from './mapper'
 import type { CreateDocumentInput } from './schemas'
-
-function isUniqueViolation(error: unknown): boolean {
-  return (
-    typeof error === 'object' &&
-    error !== null &&
-    'code' in error &&
-    (error as { code: unknown }).code === 'P2002'
-  )
-}
 
 export async function createDocument(input: CreateDocumentInput) {
   const prisma = getPrisma()
@@ -81,7 +72,7 @@ export async function createDocument(input: CreateDocumentInput) {
       return mapDocument(document)
     })
   } catch (error) {
-    if (isUniqueViolation(error)) {
+    if (isPrismaUniqueViolation(error)) {
       throw new DocumentError(
         `Dokument o numerze "${input.number}" dla tego kontrahenta już istnieje`,
         409,

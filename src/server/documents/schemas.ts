@@ -88,3 +88,58 @@ export const createDocumentBodySchema = z
   })
 
 export type CreateDocumentInput = z.infer<typeof createDocumentBodySchema>
+
+export const updateDocumentBodySchema = z
+  .object({
+    number: z.string().trim().min(1, 'Numer dokumentu jest wymagany').optional(),
+    typeId: z.string().trim().min(1, 'Typ dokumentu jest wymagany').optional(),
+    contractorId: z.string().trim().min(1).optional(),
+    contractor: contractorInputSchema.optional(),
+    issueDate: dateOnly.optional(),
+    dueDate: dateOnly.nullable().optional(),
+    netAmount: amount.optional(),
+    vatAmount: amount.optional(),
+    grossAmount: amount.optional(),
+    currency: z
+      .string()
+      .trim()
+      .length(3, 'Waluta musi być trzyliterowym kodem ISO 4217')
+      .transform((value) => value.toUpperCase())
+      .optional(),
+    paymentAccount: bankAccount.nullable().optional(),
+    categoryId: z.string().trim().min(1).nullable().optional(),
+  })
+  .refine((body) => Object.values(body).some((value) => value !== undefined), {
+    message: 'Przekaż co najmniej jedno pole do aktualizacji',
+  })
+  .refine((body) => !(body.contractorId && body.contractor), {
+    message: 'Podaj co najwyżej jedno z pól: contractorId albo contractor',
+    path: ['contractor'],
+  })
+  .superRefine((body, ctx) => {
+    const provided = [body.netAmount, body.vatAmount, body.grossAmount].filter(
+      (value) => value !== undefined,
+    ).length
+
+    if (provided > 0 && provided < 3) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Przy zmianie kwot podaj netto, VAT i brutto razem',
+        path: ['grossAmount'],
+      })
+      return
+    }
+
+    if (
+      provided === 3 &&
+      toCents(body.netAmount!) + toCents(body.vatAmount!) !== toCents(body.grossAmount!)
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Kwota brutto musi być sumą netto i VAT',
+        path: ['grossAmount'],
+      })
+    }
+  })
+
+export type UpdateDocumentInput = z.infer<typeof updateDocumentBodySchema>
