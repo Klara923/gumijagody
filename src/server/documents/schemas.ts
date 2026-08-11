@@ -143,3 +143,12 @@ export const updateDocumentBodySchema = z
   })
 
 export type UpdateDocumentInput = z.infer<typeof updateDocumentBodySchema>
+
+export const acceptDocumentsBodySchema = z.object({
+  ids: z
+    .array(z.string().trim().min(1, 'Id dokumentu jest wymagane'))
+    .min(1, 'Podaj co najmniej jeden dokument do akceptacji')
+    .transform((ids) => [...new Set(ids)]),
+})
+
+export type AcceptDocumentsInput = z.infer<typeof acceptDocumentsBodySchema>
