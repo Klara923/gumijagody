@@ -32,6 +32,11 @@ yarn-debug.log*
 # vercel
 .vercel
 
+# Pliki instrukcji dla asystentów AI, odtwarzane przy każdym `next dev`.
+# Nie są częścią projektu, a bez tego wpisu wracałyby jako nieśledzone zmiany.
+AGENTS.md
+CLAUDE.md
+
 # klient Prismy jest generowany, nie wersjonowany
 /src/generated
 
