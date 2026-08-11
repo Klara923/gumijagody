@@ -27,6 +27,13 @@ export async function GET(request: Request) {
     stage: url.searchParams.get('stage') ?? undefined,
     sortBy: url.searchParams.get('sortBy') ?? undefined,
     sortOrder: url.searchParams.get('sortOrder') ?? undefined,
+    typeId: url.searchParams.get('typeId') ?? undefined,
+    contractorId: url.searchParams.get('contractorId') ?? undefined,
+    categoryId: url.searchParams.get('categoryId') ?? undefined,
+    issueDateFrom: url.searchParams.get('issueDateFrom') ?? undefined,
+    issueDateTo: url.searchParams.get('issueDateTo') ?? undefined,
+    dueDateFrom: url.searchParams.get('dueDateFrom') ?? undefined,
+    dueDateTo: url.searchParams.get('dueDateTo') ?? undefined,
   })
 
   if (!parsed.success) {

@@ -1,14 +1,6 @@
 import { z } from 'zod'
 import { isValidBankAccount, isValidNip, normalizeBankAccount, toCents } from '@/server/validation'
 
-export const listDocumentsQuerySchema = z.object({
-  stage: z.enum(['BUFFER', 'ACCEPTED']),
-  sortBy: z.enum(['issueDate', 'dueDate']).default('issueDate'),
-  sortOrder: z.enum(['asc', 'desc']).default('desc'),
-})
-
-export type ListDocumentsQuery = z.infer<typeof listDocumentsQuerySchema>
-
 const dateOnly = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/, 'Data musi być w formacie RRRR-MM-DD')
@@ -20,6 +12,42 @@ const dateOnly = z
     }
     return date
   })
+
+export const listDocumentsQuerySchema = z
+  .object({
+    stage: z.enum(['BUFFER', 'ACCEPTED']),
+    sortBy: z.enum(['issueDate', 'dueDate']).default('issueDate'),
+    sortOrder: z.enum(['asc', 'desc']).default('desc'),
+    typeId: z.string().trim().min(1).optional(),
+    contractorId: z.string().trim().min(1).optional(),
+    categoryId: z.string().trim().min(1).optional(),
+    issueDateFrom: dateOnly.optional(),
+    issueDateTo: dateOnly.optional(),
+    dueDateFrom: dateOnly.optional(),
+    dueDateTo: dateOnly.optional(),
+  })
+  .refine(
+    (query) =>
+      !query.issueDateFrom ||
+      !query.issueDateTo ||
+      query.issueDateFrom.getTime() <= query.issueDateTo.getTime(),
+    {
+      message: 'issueDateFrom nie może być późniejsze niż issueDateTo',
+      path: ['issueDateTo'],
+    },
+  )
+  .refine(
+    (query) =>
+      !query.dueDateFrom ||
+      !query.dueDateTo ||
+      query.dueDateFrom.getTime() <= query.dueDateTo.getTime(),
+    {
+      message: 'dueDateFrom nie może być późniejsze niż dueDateTo',
+      path: ['dueDateTo'],
+    },
+  )
+
+export type ListDocumentsQuery = z.infer<typeof listDocumentsQuerySchema>
 
 const amount = z
   .string()
