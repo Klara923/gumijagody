@@ -3,6 +3,8 @@ import { isValidBankAccount, isValidNip, normalizeBankAccount, toCents } from '@
 
 export const listDocumentsQuerySchema = z.object({
   stage: z.enum(['BUFFER', 'ACCEPTED']),
+  sortBy: z.enum(['issueDate', 'dueDate']).default('issueDate'),
+  sortOrder: z.enum(['asc', 'desc']).default('desc'),
 })
 
 export type ListDocumentsQuery = z.infer<typeof listDocumentsQuerySchema>

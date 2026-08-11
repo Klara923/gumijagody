@@ -6,7 +6,7 @@ import type { ListDocumentsQuery } from './schemas'
 export async function listDocuments(query: ListDocumentsQuery) {
   const documents = await getPrisma().document.findMany({
     where: { stage: query.stage },
-    orderBy: { issueDate: 'desc' },
+    orderBy: { [query.sortBy]: query.sortOrder },
     include: DOCUMENT_INCLUDE,
   })
 

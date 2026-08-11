@@ -25,6 +25,8 @@ export async function GET(request: Request) {
   const url = new URL(request.url)
   const parsed = listDocumentsQuerySchema.safeParse({
     stage: url.searchParams.get('stage') ?? undefined,
+    sortBy: url.searchParams.get('sortBy') ?? undefined,
+    sortOrder: url.searchParams.get('sortOrder') ?? undefined,
   })
 
   if (!parsed.success) {
