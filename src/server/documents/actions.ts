@@ -8,6 +8,7 @@ import { createDocument } from '@/server/documents/create-document'
 import { deleteDocument } from '@/server/documents/delete-document'
 import { DocumentError } from '@/server/documents/errors'
 import { updateDocument } from '@/server/documents/update-document'
+import { uploadDocument } from '@/server/documents/upload-document'
 import {
   acceptDocumentsBodySchema,
   createDocumentBodySchema,
@@ -130,5 +131,46 @@ export async function acceptDocumentsAction(formData: FormData) {
     redirect('/buffer?accepted=1')
   } catch (error) {
     redirectWithError('/buffer', error)
+  }
+}
+
+export async function uploadDocumentAction(formData: FormData) {
+  const fileValue = formData.get('file')
+  if (!(fileValue instanceof File) || fileValue.size === 0) {
+    redirectWithError('/documents/upload', 'Wybierz plik PDF lub XML')
+  }
+
+  const content = Buffer.from(await fileValue.arrayBuffer())
+  const metadata = {
+    number: formString(formData, 'number'),
+    typeId: formString(formData, 'typeId'),
+    contractor: {
+      name: formString(formData, 'contractorName'),
+      nip: optionalFormString(formData, 'contractorNip'),
+    },
+    issueDate: formString(formData, 'issueDate'),
+    dueDate: optionalFormString(formData, 'dueDate'),
+    netAmount: formString(formData, 'netAmount'),
+    vatAmount: formString(formData, 'vatAmount'),
+    grossAmount: formString(formData, 'grossAmount'),
+    currency: optionalFormString(formData, 'currency') ?? 'PLN',
+    paymentAccount: optionalFormString(formData, 'paymentAccount'),
+    categoryId: optionalFormString(formData, 'categoryId'),
+  }
+
+  try {
+    const document = await uploadDocument(
+      {
+        filename: fileValue.name,
+        mimeType: fileValue.type || 'application/octet-stream',
+        content,
+      },
+      metadata,
+    )
+    revalidatePath('/documents')
+    revalidatePath('/buffer')
+    redirect(`/buffer?uploaded=${encodeURIComponent(document.id)}`)
+  } catch (error) {
+    redirectWithError('/documents/upload', error)
   }
 }

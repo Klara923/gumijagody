@@ -182,3 +182,33 @@ export const acceptDocumentsBodySchema = z.object({
 })
 
 export type AcceptDocumentsInput = z.infer<typeof acceptDocumentsBodySchema>
+
+export const uploadPdfMetadataSchema = z
+  .object({
+    number: z.string().trim().min(1, 'Numer dokumentu jest wymagany'),
+    typeId: z.string().trim().min(1, 'Typ dokumentu jest wymagany'),
+    contractor: contractorInputSchema,
+    issueDate: dateOnly,
+    dueDate: dateOnly.optional(),
+    netAmount: amount,
+    vatAmount: amount,
+    grossAmount: amount,
+    currency: z
+      .string()
+      .trim()
+      .length(3, 'Waluta musi być trzyliterowym kodem ISO 4217')
+      .transform((value) => value.toUpperCase())
+      .default('PLN'),
+    paymentAccount: bankAccount.optional(),
+    categoryId: z.string().trim().min(1).optional(),
+  })
+  .refine((body) => toCents(body.netAmount) + toCents(body.vatAmount) === toCents(body.grossAmount), {
+    message: 'Kwota brutto musi być sumą netto i VAT',
+    path: ['grossAmount'],
+  })
+  .refine((body) => !body.dueDate || body.dueDate.getTime() >= body.issueDate.getTime(), {
+    message: 'Termin płatności nie może być wcześniejszy niż data wystawienia',
+    path: ['dueDate'],
+  })
+
+export type UploadPdfMetadata = z.infer<typeof uploadPdfMetadataSchema>

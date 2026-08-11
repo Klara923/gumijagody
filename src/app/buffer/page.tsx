@@ -13,6 +13,7 @@ export default async function BufferPage({ searchParams }: { searchParams: Searc
   const params = await searchParams
   const error = first(params.error)
   const accepted = first(params.accepted)
+  const uploaded = first(params.uploaded)
   const items = await listDocuments({
     stage: 'BUFFER',
     sortBy: 'issueDate',
@@ -26,6 +27,7 @@ export default async function BufferPage({ searchParams }: { searchParams: Searc
 
       {error && <p style={{ color: 'crimson' }}>{error}</p>}
       {accepted && <p>Zaakceptowano wybrane dokumenty.</p>}
+      {uploaded && <p>Wgrano dokument do bufora.</p>}
 
       {items.length === 0 ? (
         <p>Bufor jest pusty.</p>
