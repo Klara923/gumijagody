@@ -13,23 +13,6 @@ import {
   type PublicKeyCertificate,
 } from './schemas'
 
-/**
- * Uwierzytelnienie w KSeF 2.0 tokenem KSeF.
- *
- * Przebieg wynika z kontraktu OpenAPI środowiska testowego
- * (https://api-test.ksef.mf.gov.pl/docs/v2/openapi.json):
- *
- *   1. POST /auth/challenge                    -> challenge + timestampMs
- *   2. GET  /security/public-key-certificates  -> certyfikat RSA (usage: KsefTokenEncryption)
- *   3. RSA-OAEP (SHA-256) na `${token}|${timestampMs}`
- *   4. POST /auth/ksef-token                   -> referenceNumber + authenticationToken
- *   5. GET  /auth/{referenceNumber}            -> polling do statusu innego niż 100
- *   6. POST /auth/token/redeem                 -> accessToken + refreshToken
- *
- * Moduł celowo nic nie wypisuje na wyjście - postęp raportuje przez `onProgress`,
- * żeby warstwa infrastruktury nie zakładała, kto jej używa (route handler czy CLI).
- */
-
 const CERTIFICATE_USAGE = 'KsefTokenEncryption'
 
 const DEFAULT_POLL_INTERVAL_MS = 2_000
@@ -37,7 +20,6 @@ const DEFAULT_POLL_TIMEOUT_MS = 60_000
 
 export type KsefCredentials = {
   baseUrl: string
-  /** NIP kontekstu, na który wygenerowano token. */
   nip: string
   token: string
 }
@@ -54,7 +36,6 @@ export type AuthenticateOptions = {
   pollTimeoutMs?: number
 }
 
-/** Drzemka przerywalna sygnałem - bez tego anulowanie działa dopiero po jej zakończeniu. */
 function sleep(ms: number, signal?: AbortSignal): Promise<void> {
   return new Promise((resolve, reject) => {
     if (signal?.aborted) {
@@ -75,12 +56,6 @@ function sleep(ms: number, signal?: AbortSignal): Promise<void> {
   })
 }
 
-/**
- * Wybiera certyfikat o wskazanym zastosowaniu, ważny w danej chwili.
- *
- * Gdy ważnych jest kilka - co zdarza się w okresie rotacji kluczy - bierzemy najnowszy.
- * Kolejność zwracana przez API nie jest gwarantowana, a wybór musi być powtarzalny.
- */
 export function selectCertificate(
   certificates: PublicKeyCertificate[],
   usage: string,
@@ -103,12 +78,6 @@ export function selectCertificate(
   return newest
 }
 
-/**
- * Szyfruje `${token}|${timestampMs}` kluczem publicznym Ministerstwa Finansów.
- *
- * Certyfikat przychodzi jako DER w base64, a towarzyszące pole z gotowym PEM-em bywa puste,
- * dlatego klucz publiczny wyciągamy z certyfikatu X.509 zamiast na nim polegać.
- */
 export function encryptKsefToken(
   certificateDerBase64: string,
   token: string,
@@ -121,8 +90,6 @@ export function encryptKsefToken(
     throw new KsefError('Nie udało się odczytać certyfikatu klucza publicznego KSeF', { cause })
   }
 
-  // Schemat szyfrowania jest związany z rodzajem klucza. Jawne sprawdzenie zamienia
-  // enigmatyczny wyjątek biblioteki kryptograficznej w informację, co się właściwie stało.
   if (publicKey.asymmetricKeyType !== 'rsa') {
     throw new KsefError(
       `Certyfikat KSeF używa klucza ${publicKey.asymmetricKeyType ?? 'nieznanego typu'}, ` +

@@ -1,8 +1,3 @@
-/**
- * Błąd integracji z KSeF. Niesie kod HTTP oraz kod statusu KSeF, bo dopiero ich kombinacja
- * pozwala odróżnić przypadki, które trzeba obsłużyć inaczej: ponowić, odświeżyć token
- * albo pokazać użytkownikowi konkretną przyczynę.
- */
 export class KsefError extends Error {
   readonly httpStatus?: number
   readonly ksefCode?: number
@@ -20,7 +15,6 @@ export class KsefError extends Error {
   }
 }
 
-/** Kody statusu operacji uwierzytelnienia zwracane przez GET /auth/{referenceNumber}. */
 export const AUTH_STATUS = {
   IN_PROGRESS: 100,
   SUCCESS: 200,
@@ -29,17 +23,11 @@ export const AUTH_STATUS = {
   INVALID_TOKEN: 450,
 } as const
 
-/**
- * Tłumaczy kod statusu na wskazówkę, co konkretnie zrobić - opis z API mówi *co* się stało,
- * ale nie *dlaczego*, a przyczyna jest prawie zawsze ta sama i łatwa do wskazania.
- */
 export function explainAuthStatus(code: number): string | undefined {
   switch (code) {
     case AUTH_STATUS.NO_PERMISSIONS:
       return 'Token jest poprawny, ale nie ma uprawnień w tym kontekście. Sprawdź, czy KSEF_NIP zgadza się z NIP-em, dla którego wygenerowano token, oraz czy token ma uprawnienie "przeglądanie faktur".'
     case AUTH_STATUS.INVALID_TOKEN:
-      // Ten sam kod 450 obejmuje kilka różnych przyczyn, a rozróżnia je dopiero pole `details`
-      // z odpowiedzi - dlatego wskazówka wymienia je wszystkie, zamiast zgadywać jedną.
       return [
         'KSeF odrzucił token. Sprawdź kolejno:',
         '  - czy KSEF_NIP to dokładnie ten NIP, na który byłaś zalogowana przy generowaniu tokena',

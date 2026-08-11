@@ -1,48 +1,36 @@
-# dependencies
 /node_modules
 /.pnp
 .pnp.*
 
-# testing
 /coverage
 /playwright-report
 /test-results
 
-# next.js
 /.next/
 /out/
 /build
 
-# misc
 .DS_Store
 *.pem
 .backup
 scaffold-tmp
 
-# debug
 npm-debug.log*
 yarn-debug.log*
 .pnpm-debug.log*
 
-# Poświadczenia KSeF nigdy nie trafiają do repozytorium
 .env
 .env.*
 !.env.example
 
-# vercel
 .vercel
 
-# Pliki instrukcji dla asystentów AI, odtwarzane przy każdym `next dev`.
-# Nie są częścią projektu, a bez tego wpisu wracałyby jako nieśledzone zmiany.
 AGENTS.md
 CLAUDE.md
 
-# klient Prismy jest generowany, nie wersjonowany
 /src/generated
 
-# lokalny storage załączników
 /storage
 
-# typescript
 *.tsbuildinfo
 next-env.d.ts

@@ -1,9 +1,5 @@
 import { z } from 'zod'
 
-/**
- * Pusta zmienna w pliku `.env` (np. `KSEF_TOKEN=""`) oznacza brak wartości, a nie pusty string.
- * Bez tej normalizacji szablon `.env.example` z pustymi polami wywracałby walidację.
- */
 const optional = <T extends z.ZodType>(schema: T) =>
   z.preprocess((value) => (value === '' ? undefined : value), schema.optional())
 
@@ -25,10 +21,6 @@ export type Env = z.infer<typeof envSchema>
 
 let cached: Env | undefined
 
-/**
- * Walidacja jest leniwa i wykonuje się przy pierwszym użyciu, a nie przy imporcie modułu -
- * dzięki temu `next build` nie wymaga dostępu do sekretów produkcyjnych.
- */
 export function getEnv(): Env {
   if (cached) return cached
 

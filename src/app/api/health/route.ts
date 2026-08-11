@@ -4,10 +4,6 @@ import { getPrisma } from '@/server/infrastructure/db/prisma'
 
 export const dynamic = 'force-dynamic'
 
-/**
- * Sprawdzenie stanu aplikacji razem z realnym zapytaniem do bazy.
- * Odpowiada na pytanie "czy wdrożenie działa end-to-end", a nie tylko "czy frontend się renderuje".
- */
 export async function GET() {
   const startedAt = performance.now()
 
@@ -21,8 +17,6 @@ export async function GET() {
       timestamp: new Date().toISOString(),
     })
   } catch (error) {
-    // Prisma zwraca dla błędów połączenia pustą wiadomość, a przyczynę trzyma w polu `code`
-    // (np. ECONNREFUSED) - bez niego diagnostyka wdrożenia sprowadza się do zgadywania.
     const code =
       error && typeof error === 'object' && 'code' in error ? String(error.code) : undefined
 

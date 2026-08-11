@@ -2,21 +2,14 @@ import type { z } from 'zod'
 
 import { KsefError } from './errors'
 
-/**
- * Bez limitu czasu żądanie do milczącego serwera wisi w nieskończoność. Przy nocnym
- * harmonogramie oznaczałoby to zadanie blokujące kolejne uruchomienia aż do rana.
- */
 const DEFAULT_TIMEOUT_MS = 30_000
 
-/** Ciało błędu bywa stroną HTML od proxy - w diagnostyce liczy się początek, nie całość. */
 const MAX_DETAIL_LENGTH = 500
 
 export type KsefRequest<S extends z.ZodType> = {
-  /** Schemat odpowiedzi. Wymagany, bo dane z KSeF są wejściem niezaufanym. */
   schema: S
   method?: 'GET' | 'POST'
   body?: unknown
-  /** Token przekazywany w nagłówku Authorization (authenticationToken albo accessToken). */
   bearer?: string
   signal?: AbortSignal
   timeoutMs?: number
@@ -25,11 +18,6 @@ export type KsefRequest<S extends z.ZodType> = {
 const truncate = (text: string) =>
   text.length > MAX_DETAIL_LENGTH ? `${text.slice(0, MAX_DETAIL_LENGTH)}… (ucięto)` : text
 
-/**
- * Cienki klient HTTP dla API KSeF. Jedyne miejsce, w którym znamy kształt transportu -
- * dzięki temu obsługa błędów, nagłówki i limity czasu są spójne dla wszystkich wywołań,
- * a każda odpowiedź jest zwalidowana zanim opuści tę funkcję.
- */
 export async function ksefFetch<S extends z.ZodType>(
   baseUrl: string,
   path: string,
@@ -49,7 +37,6 @@ export async function ksefFetch<S extends z.ZodType>(
       signal: combined,
       headers: {
         Accept: 'application/json',
-        // Ustandaryzowany format błędów (RFC 7807) zamiast własnego kształtu odpowiedzi KSeF.
         'X-Error-Format': 'problem-details',
         ...(body === undefined ? {} : { 'Content-Type': 'application/json' }),
         ...(bearer ? { Authorization: `Bearer ${bearer}` } : {}),
@@ -57,8 +44,6 @@ export async function ksefFetch<S extends z.ZodType>(
     })
     raw = await response.text()
   } catch (cause) {
-    // Przerwanie zlecone przez wołającego nie jest awarią integracji - przekazujemy je dalej
-    // bez zmiany typu, żeby nie udawać, że to KSeF zawiódł.
     if (signal?.aborted) throw cause
 
     if (timeout.aborted) {
@@ -66,8 +51,6 @@ export async function ksefFetch<S extends z.ZodType>(
         cause,
       })
     }
-    // Niedostępność KSeF jest normalnym stanem, nie wyjątkiem od reguły - opakowujemy ją
-    // w ten sam typ błędu co odpowiedzi negatywne, żeby wołający miał jedną ścieżkę obsługi.
     throw new KsefError(`Nie udało się połączyć z KSeF (${method} ${path})`, { cause })
   }
 

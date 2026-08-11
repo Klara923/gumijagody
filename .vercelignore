@@ -1,5 +1,3 @@
-# Lokalna konfiguracja nie może trafić do wdrożenia - zmienne produkcyjne ustawiane są
-# wyłącznie po stronie hostingu. Bez tego CLI wgrywa plik .env razem z kodem.
 .env
 .env.*
 !.env.example

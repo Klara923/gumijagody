@@ -1,13 +1,5 @@
 import { z } from 'zod'
 
-/**
- * Kontrakt odpowiedzi KSeF. Schematy opisują wyłącznie pola, z których faktycznie korzystamy -
- * Zod domyślnie odrzuca nadmiarowe klucze przy odczycie, więc rozszerzenie API po stronie
- * Ministerstwa nie wywróci integracji, a usunięcie potrzebnego pola wyjdzie natychmiast
- * i z nazwą tego pola, zamiast objawić się kilka wywołań później jako `undefined`.
- */
-
-/** Data z API bywa tylko stringiem - zamieniamy ją na `Date` już na granicy systemu. */
 const isoDate = z.string().transform((value, ctx) => {
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) {
@@ -23,7 +15,6 @@ export const challengeSchema = z.object({
 })
 
 export const publicKeyCertificateSchema = z.object({
-  /** Certyfikat X.509 w postaci DER zakodowanej base64. */
   certificate: z.string().min(1),
   publicKeyId: z.string().min(1),
   validFrom: isoDate,
