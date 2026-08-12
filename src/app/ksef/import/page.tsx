@@ -1,8 +1,11 @@
+import Link from 'next/link'
+
 import {
   Alert,
   Field,
   PageShell,
   buttonClassName,
+  buttonSecondaryClassName,
   controlClassName,
 } from '@/components/ui-kit'
 import { importFromKsefAction } from '@/server/documents/actions'
@@ -36,6 +39,12 @@ export default async function KsefImportPage({ searchParams }: { searchParams: S
       title="Pobieranie z KSeF"
       description="Faktury kosztowe lub sprzedażowe z zakresu dat trafiają do bufora. Duplikaty (ten sam numer KSeF) są pomijane."
     >
+      <p>
+        <Link href="/ksef/schedule" className={buttonSecondaryClassName}>
+          Harmonogram automatyczny
+        </Link>
+      </p>
+
       {error && <Alert>{error}</Alert>}
       {imported !== undefined && (
         <Alert tone="ok">

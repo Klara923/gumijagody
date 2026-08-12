@@ -7,6 +7,7 @@ const links = [
   { href: '/buffer', label: 'Bufor', hint: 'oczekujące na akceptację' },
   { href: '/documents/upload', label: 'Upload PDF/XML', hint: 'wgraj do bufora' },
   { href: '/ksef/import', label: 'Pobierz z KSeF', hint: 'import do bufora' },
+  { href: '/ksef/schedule', label: 'Harmonogram KSeF', hint: 'wiele godzin na dobę' },
   { href: '/categories', label: 'Kategorie', hint: 'drzewo kosztów' },
   { href: '/contractors', label: 'Kontrahenci', hint: 'reguła kategorii' },
   { href: '/documents/new', label: 'Nowy dokument', hint: 'ręczne dodanie' },

@@ -10,6 +10,7 @@ const links = [
   { href: '/documents/new', label: 'Nowy' },
   { href: '/documents/upload', label: 'Upload' },
   { href: '/ksef/import', label: 'KSeF' },
+  { href: '/ksef/schedule', label: 'Harmonogram' },
   { href: '/categories', label: 'Kategorie' },
   { href: '/contractors', label: 'Kontrahenci' },
 ]

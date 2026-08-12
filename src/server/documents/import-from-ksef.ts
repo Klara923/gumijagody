@@ -15,7 +15,10 @@ function daysInclusive(from: Date, to: Date): number {
   return Math.floor((to.getTime() - from.getTime()) / (24 * 60 * 60 * 1000)) + 1
 }
 
-export async function importFromKsef(input: ImportFromKsefInput) {
+export async function importFromKsef(
+  input: ImportFromKsefInput,
+  options?: { trigger?: 'MANUAL' | 'SCHEDULED' },
+) {
   if (input.rangeTo.getTime() < input.rangeFrom.getTime()) {
     throw new DocumentError('Zakres dat jest nieprawidłowy (od > do)', 400)
   }
@@ -24,10 +27,11 @@ export async function importFromKsef(input: ImportFromKsefInput) {
     throw new DocumentError('Maksymalny zakres pobierania to 3 miesiące', 400)
   }
 
+  const trigger = options?.trigger ?? 'MANUAL'
   const prisma = getPrisma()
   const run = await prisma.importRun.create({
     data: {
-      trigger: 'MANUAL',
+      trigger,
       invoiceKind: input.invoiceKind,
       rangeFrom: input.rangeFrom,
       rangeTo: input.rangeTo,
