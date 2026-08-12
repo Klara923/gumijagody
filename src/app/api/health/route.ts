@@ -1,7 +1,13 @@
+import { neon } from '@neondatabase/serverless'
 import { NextResponse } from 'next/server'
 
 import { getEnv } from '@/server/env'
-import { getPrisma, getPrismaAdapterName } from '@/server/infrastructure/db/prisma'
+import {
+  getPrisma,
+  getPrismaAdapterName,
+  getPrismaConnectUrl,
+  stripChannelBinding,
+} from '@/server/infrastructure/db/prisma'
 
 export const dynamic = 'force-dynamic'
 
@@ -30,6 +36,19 @@ function describeDatabaseUrl(databaseUrl: string) {
   }
 }
 
+async function probeHttp(connectionString: string) {
+  try {
+    const sql = neon(connectionString)
+    await sql`SELECT 1`
+    return { ok: true as const }
+  } catch (error) {
+    return {
+      ok: false as const,
+      message: error instanceof Error ? error.message.trim() : 'unknown',
+    }
+  }
+}
+
 export async function GET() {
   const startedAt = performance.now()
 
@@ -49,6 +68,8 @@ export async function GET() {
   }
 
   const databaseUrlInfo = describeDatabaseUrl(databaseUrl)
+  const connectUrl = getPrismaConnectUrl(databaseUrl)
+  const httpProbe = await probeHttp(stripChannelBinding(databaseUrl))
 
   try {
     await getPrisma().$queryRaw`SELECT 1`
@@ -57,6 +78,8 @@ export async function GET() {
       status: 'ok',
       database: 'up',
       adapter: getPrismaAdapterName(databaseUrl),
+      connectHost: describeDatabaseUrl(connectUrl).host ?? null,
+      httpProbe,
       latencyMs: Math.round(performance.now() - startedAt),
       databaseUrlInfo,
       timestamp: new Date().toISOString(),
@@ -72,6 +95,8 @@ export async function GET() {
         code,
         message: error instanceof Error ? error.message.trim() : 'Nieznany błąd połączenia z bazą',
         adapter: getPrismaAdapterName(databaseUrl),
+        connectHost: describeDatabaseUrl(connectUrl).host ?? null,
+        httpProbe,
         databaseUrlInfo,
         timestamp: new Date().toISOString(),
       },
