@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 
 import { getEnv } from '@/server/env'
-import { getPrisma } from '@/server/infrastructure/db/prisma'
+import { getPrisma, getPrismaAdapterName } from '@/server/infrastructure/db/prisma'
 
 export const dynamic = 'force-dynamic'
 
@@ -56,6 +56,7 @@ export async function GET() {
     return NextResponse.json({
       status: 'ok',
       database: 'up',
+      adapter: getPrismaAdapterName(databaseUrl),
       latencyMs: Math.round(performance.now() - startedAt),
       databaseUrlInfo,
       timestamp: new Date().toISOString(),
@@ -70,6 +71,7 @@ export async function GET() {
         database: 'down',
         code,
         message: error instanceof Error ? error.message.trim() : 'Nieznany błąd połączenia z bazą',
+        adapter: getPrismaAdapterName(databaseUrl),
         databaseUrlInfo,
         timestamp: new Date().toISOString(),
       },

@@ -1,15 +1,15 @@
+import { neonConfig } from '@neondatabase/serverless'
+import { PrismaNeon } from '@prisma/adapter-neon'
 import { PrismaPg } from '@prisma/adapter-pg'
+import ws from 'ws'
 
 import { PrismaClient } from '@/generated/prisma/client'
 import { getEnv } from '@/server/env'
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient }
 
-/**
- * Neon pooled URLs include `channel_binding=require`. node-pg does not support
- * SCRAM-SHA-256-PLUS, so that flag fails with 28P01 even when the password is
- * correct. Only the query flag is stripped — the userinfo is left untouched.
- */
+neonConfig.webSocketConstructor = ws
+
 export function sanitizeDatabaseUrl(connectionString: string): string {
   const [base, query] = connectionString.split('?')
   if (!query) return connectionString
@@ -21,11 +21,18 @@ export function sanitizeDatabaseUrl(connectionString: string): string {
   return params.length > 0 ? `${base}?${params.join('&')}` : base
 }
 
+export function getPrismaAdapterName(connectionString = getEnv().DATABASE_URL): 'neon' | 'pg' {
+  return connectionString.includes('.neon.tech') ? 'neon' : 'pg'
+}
+
 export function getPrisma(): PrismaClient {
   if (globalForPrisma.prisma) return globalForPrisma.prisma
 
-  const adapter = new PrismaPg({ connectionString: sanitizeDatabaseUrl(getEnv().DATABASE_URL) })
-  globalForPrisma.prisma = new PrismaClient({ adapter })
+  const connectionString = sanitizeDatabaseUrl(getEnv().DATABASE_URL)
+  const adapter = connectionString.includes('.neon.tech')
+    ? new PrismaNeon({ connectionString })
+    : new PrismaPg({ connectionString })
 
+  globalForPrisma.prisma = new PrismaClient({ adapter })
   return globalForPrisma.prisma
 }
