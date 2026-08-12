@@ -50,6 +50,7 @@ export default async function BufferPage({ searchParams }: { searchParams: Searc
                   <th className={thClassName}>Numer</th>
                   <th className={thClassName}>Typ</th>
                   <th className={thClassName}>Kontrahent</th>
+                  <th className={thClassName}>Kategoria</th>
                   <th className={thClassName}>Data</th>
                   <th className={thClassName}>Brutto</th>
                   <th className={thClassName}>Źródło</th>
@@ -65,6 +66,7 @@ export default async function BufferPage({ searchParams }: { searchParams: Searc
                     <td className={tdClassName}>{document.number}</td>
                     <td className={tdClassName}>{document.type.name}</td>
                     <td className={tdClassName}>{document.contractor.name}</td>
+                    <td className={tdClassName}>{document.category?.name ?? '—'}</td>
                     <td className={tdClassName}>{document.issueDate}</td>
                     <td className={tdClassName}>
                       {document.grossAmount} {document.currency}

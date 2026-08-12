@@ -68,3 +68,28 @@ export async function listCategoryOptions(): Promise<CategoryOption[]> {
   walk(tree, 0, '')
   return options
 }
+
+export async function listCategorySubtreeIds(categoryId: string): Promise<string[]> {
+  const categories = await getPrisma().category.findMany({
+    select: { id: true, parentId: true },
+  })
+
+  const childrenByParent = new Map<string, string[]>()
+  for (const category of categories) {
+    if (!category.parentId) continue
+    const bucket = childrenByParent.get(category.parentId) ?? []
+    bucket.push(category.id)
+    childrenByParent.set(category.parentId, bucket)
+  }
+
+  const ids: string[] = []
+  const stack = [categoryId]
+  while (stack.length > 0) {
+    const current = stack.pop()!
+    ids.push(current)
+    const children = childrenByParent.get(current)
+    if (children) stack.push(...children)
+  }
+
+  return ids
+}

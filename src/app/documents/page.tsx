@@ -11,6 +11,7 @@ import {
   thClassName,
 } from '@/components/ui-kit'
 import { listCategoryOptions } from '@/server/categories/list-categories'
+import { listContractors } from '@/server/contractors/list-contractors'
 import { listDocuments } from '@/server/documents/list-documents'
 import { listDocumentsQuerySchema } from '@/server/documents/schemas'
 import { getPrisma } from '@/server/infrastructure/db/prisma'
@@ -38,6 +39,7 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Se
 
   const types = await getPrisma().documentType.findMany({ orderBy: { name: 'asc' } })
   const categories = await listCategoryOptions()
+  const contractors = await listContractors()
   const items = parsed.success ? await listDocuments(parsed.data) : []
 
   return (
@@ -61,6 +63,21 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Se
             {types.map((type) => (
               <option key={type.id} value={type.id}>
                 {type.name}
+              </option>
+            ))}
+          </select>
+        </Field>
+        <Field label="Kontrahent">
+          <select
+            name="contractorId"
+            defaultValue={first(params.contractorId) ?? ''}
+            className={controlClassName}
+          >
+            <option value="">Wszystkie</option>
+            {contractors.map((contractor) => (
+              <option key={contractor.id} value={contractor.id}>
+                {contractor.name}
+                {contractor.nip ? ` (${contractor.nip})` : ''}
               </option>
             ))}
           </select>
@@ -93,6 +110,24 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Se
               type="date"
               name="issueDateTo"
               defaultValue={first(params.issueDateTo) ?? ''}
+              className={controlClassName}
+            />
+          </Field>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Field label="Termin płatności od">
+            <input
+              type="date"
+              name="dueDateFrom"
+              defaultValue={first(params.dueDateFrom) ?? ''}
+              className={controlClassName}
+            />
+          </Field>
+          <Field label="Termin płatności do">
+            <input
+              type="date"
+              name="dueDateTo"
+              defaultValue={first(params.dueDateTo) ?? ''}
               className={controlClassName}
             />
           </Field>

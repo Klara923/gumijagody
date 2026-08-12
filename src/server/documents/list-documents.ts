@@ -1,16 +1,21 @@
 import type { Prisma } from '@/generated/prisma/client'
 
+import { listCategorySubtreeIds } from '@/server/categories/list-categories'
 import { getPrisma } from '@/server/infrastructure/db/prisma'
 
 import { DOCUMENT_INCLUDE, mapDocument } from './mapper'
 import type { ListDocumentsQuery } from './schemas'
 
 export async function listDocuments(query: ListDocumentsQuery) {
+  const categoryIds = query.categoryId
+    ? await listCategorySubtreeIds(query.categoryId)
+    : null
+
   const where: Prisma.DocumentWhereInput = {
     stage: query.stage,
     ...(query.typeId ? { typeId: query.typeId } : {}),
     ...(query.contractorId ? { contractorId: query.contractorId } : {}),
-    ...(query.categoryId ? { categoryId: query.categoryId } : {}),
+    ...(categoryIds ? { categoryId: { in: categoryIds } } : {}),
     ...(query.issueDateFrom || query.issueDateTo
       ? {
           issueDate: {
