@@ -5,6 +5,7 @@ import { isRedirectError } from 'next/dist/client/components/redirect-error'
 import { redirect } from 'next/navigation'
 
 import { acceptDocuments } from '@/server/documents/accept-documents'
+import { assignDocumentCategory } from '@/server/documents/assign-category'
 import { createDocument } from '@/server/documents/create-document'
 import { deleteDocument } from '@/server/documents/delete-document'
 import { DocumentError } from '@/server/documents/errors'
@@ -17,6 +18,7 @@ import {
 } from '@/server/documents/schemas'
 import { updateDocument } from '@/server/documents/update-document'
 import { uploadDocument } from '@/server/documents/upload-document'
+import { CategoryError } from '@/server/categories/errors'
 import { KsefError } from '@/server/infrastructure/ksef/errors'
 
 function formString(formData: FormData, key: string) {
@@ -33,7 +35,9 @@ function redirectWithError(path: string, error: unknown): never {
   if (isRedirectError(error)) throw error
 
   const message =
-    error instanceof DocumentError || error instanceof KsefError
+    error instanceof DocumentError ||
+    error instanceof KsefError ||
+    error instanceof CategoryError
       ? error.message
       : typeof error === 'string'
         ? error
@@ -58,6 +62,7 @@ export async function createDocumentAction(formData: FormData) {
     grossAmount: formString(formData, 'grossAmount'),
     currency: optionalFormString(formData, 'currency') ?? 'PLN',
     paymentAccount: optionalFormString(formData, 'paymentAccount'),
+    categoryId: optionalFormString(formData, 'categoryId'),
   }
 
   const parsed = createDocumentBodySchema.safeParse(raw)
@@ -88,6 +93,10 @@ export async function updateDocumentAction(formData: FormData) {
     grossAmount: optionalFormString(formData, 'grossAmount'),
     currency: optionalFormString(formData, 'currency'),
     paymentAccount: optionalFormString(formData, 'paymentAccount'),
+    categoryId:
+      formData.get('categoryId') === ''
+        ? null
+        : optionalFormString(formData, 'categoryId'),
   }
 
   const parsed = updateDocumentBodySchema.safeParse(raw)
@@ -100,6 +109,24 @@ export async function updateDocumentAction(formData: FormData) {
 
   try {
     await updateDocument(id, parsed.data)
+    revalidatePath('/documents')
+    revalidatePath('/buffer')
+    revalidatePath(`/documents/${id}`)
+    redirect(`/documents/${id}?saved=1`)
+  } catch (error) {
+    redirectWithError(`/documents/${id}`, error)
+  }
+}
+
+export async function assignDocumentCategoryAction(formData: FormData) {
+  const id = formString(formData, 'id')
+  const categoryId =
+    formData.get('categoryId') === '' || formData.get('categoryId') === null
+      ? null
+      : formString(formData, 'categoryId')
+
+  try {
+    await assignDocumentCategory(id, categoryId)
     revalidatePath('/documents')
     revalidatePath('/buffer')
     revalidatePath(`/documents/${id}`)

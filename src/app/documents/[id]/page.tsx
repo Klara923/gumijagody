@@ -1,7 +1,20 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
-import { deleteDocumentAction, updateDocumentAction } from '@/server/documents/actions'
+import {
+  Alert,
+  Field,
+  PageShell,
+  buttonClassName,
+  buttonSecondaryClassName,
+  controlClassName,
+} from '@/components/ui-kit'
+import { listCategoryOptions } from '@/server/categories/list-categories'
+import {
+  assignDocumentCategoryAction,
+  deleteDocumentAction,
+  updateDocumentAction,
+} from '@/server/documents/actions'
 import { DocumentError } from '@/server/documents/errors'
 import { getDocumentById } from '@/server/documents/get-document'
 import { getPrisma } from '@/server/infrastructure/db/prisma'
@@ -34,24 +47,24 @@ export default async function DocumentDetailPage({
   }
 
   const types = await getPrisma().documentType.findMany({ orderBy: { name: 'asc' } })
+  const categories = await listCategoryOptions()
   const editable = document.source === 'MANUAL' || document.source === 'UPLOAD'
+  const backHref = document.stage === 'BUFFER' ? '/buffer' : '/documents'
 
   return (
-    <main style={{ padding: '1rem', maxWidth: 560 }}>
+    <PageShell title={document.number} description={`Stage: ${document.stage} · Źródło: ${document.source}`}>
       <p>
-        <Link href={document.stage === 'BUFFER' ? '/buffer' : '/documents'}>← Wróć</Link>
-      </p>
-      <h1>{document.number}</h1>
-      <p>
-        Stage: {document.stage} · Źródło: {document.source}
+        <Link href={backHref} className="text-sm text-zinc-600 underline">
+          ← Wróć
+        </Link>
       </p>
 
-      {error && <p style={{ color: 'crimson' }}>{error}</p>}
-      {saved && <p>Zapisano.</p>}
+      {error && <Alert>{error}</Alert>}
+      {saved && <Alert tone="ok">Zapisano.</Alert>}
 
       {!editable ? (
-        <div style={{ display: 'grid', gap: '0.5rem' }}>
-          <p>Dokument z KSeF — tylko podgląd (bez edycji i usuwania).</p>
+        <div className="space-y-2 rounded-lg border border-zinc-200 bg-white p-4 text-sm">
+          <p className="text-zinc-600">Dokument z KSeF — dane faktury tylko do odczytu; kategorię możesz zmienić.</p>
           <p>Typ: {document.type.name}</p>
           <p>
             Kontrahent: {document.contractor.name}
@@ -63,103 +76,100 @@ export default async function DocumentDetailPage({
             Netto / VAT / Brutto: {document.netAmount} / {document.vatAmount} / {document.grossAmount}{' '}
             {document.currency}
           </p>
+          <p>Kategoria: {document.category?.name ?? '—'}</p>
+          <form action={assignDocumentCategoryAction} className="flex flex-wrap gap-2 pt-2">
+            <input type="hidden" name="id" value={document.id} />
+            <select name="categoryId" defaultValue={document.category?.id ?? ''} className={controlClassName}>
+              <option value="">— brak —</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.label}
+                </option>
+              ))}
+            </select>
+            <button type="submit" className={buttonClassName}>
+              Zapisz kategorię
+            </button>
+          </form>
         </div>
       ) : (
         <>
-          <form action={updateDocumentAction} style={{ display: 'grid', gap: '0.75rem' }}>
+          <form action={updateDocumentAction} className="grid gap-3 rounded-lg border border-zinc-200 bg-white p-4">
             <input type="hidden" name="id" value={document.id} />
             <input type="hidden" name="contractorId" value={document.contractor.id} />
-            <label>
-              Numer
-              <input
-                name="number"
-                defaultValue={document.number}
-                required
-                style={{ display: 'block', width: '100%' }}
-              />
-            </label>
-            <label>
-              Typ
-              <select
-                name="typeId"
-                defaultValue={document.type.id}
-                required
-                style={{ display: 'block', width: '100%' }}
-              >
+            <Field label="Numer">
+              <input name="number" defaultValue={document.number} required className={controlClassName} />
+            </Field>
+            <Field label="Typ">
+              <select name="typeId" defaultValue={document.type.id} required className={controlClassName}>
                 {types.map((type) => (
                   <option key={type.id} value={type.id}>
                     {type.name}
                   </option>
                 ))}
               </select>
-            </label>
-            <p>
+            </Field>
+            <p className="text-sm text-zinc-600">
               Kontrahent: {document.contractor.name}
               {document.contractor.nip ? ` (${document.contractor.nip})` : ''}
             </p>
-            <label>
-              Data wystawienia
+            <Field label="Kategoria">
+              <select name="categoryId" defaultValue={document.category?.id ?? ''} className={controlClassName}>
+                <option value="">— brak —</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.label}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Data wystawienia">
               <input
                 type="date"
                 name="issueDate"
                 defaultValue={document.issueDate}
                 required
-                style={{ display: 'block', width: '100%' }}
+                className={controlClassName}
               />
-            </label>
-            <label>
-              Termin płatności
+            </Field>
+            <Field label="Termin płatności">
               <input
                 type="date"
                 name="dueDate"
                 defaultValue={document.dueDate ?? ''}
-                style={{ display: 'block', width: '100%' }}
+                className={controlClassName}
               />
-            </label>
-            <label>
-              Netto
-              <input
-                name="netAmount"
-                defaultValue={document.netAmount}
-                required
-                style={{ display: 'block', width: '100%' }}
-              />
-            </label>
-            <label>
-              VAT
-              <input
-                name="vatAmount"
-                defaultValue={document.vatAmount}
-                required
-                style={{ display: 'block', width: '100%' }}
-              />
-            </label>
-            <label>
-              Brutto
+            </Field>
+            <Field label="Netto">
+              <input name="netAmount" defaultValue={document.netAmount} required className={controlClassName} />
+            </Field>
+            <Field label="VAT">
+              <input name="vatAmount" defaultValue={document.vatAmount} required className={controlClassName} />
+            </Field>
+            <Field label="Brutto">
               <input
                 name="grossAmount"
                 defaultValue={document.grossAmount}
                 required
-                style={{ display: 'block', width: '100%' }}
+                className={controlClassName}
               />
-            </label>
-            <label>
-              Waluta
-              <input
-                name="currency"
-                defaultValue={document.currency}
-                style={{ display: 'block', width: '100%' }}
-              />
-            </label>
-            <button type="submit">Zapisz zmiany</button>
+            </Field>
+            <Field label="Waluta">
+              <input name="currency" defaultValue={document.currency} className={controlClassName} />
+            </Field>
+            <button type="submit" className={buttonClassName}>
+              Zapisz zmiany
+            </button>
           </form>
 
-          <form action={deleteDocumentAction} style={{ marginTop: '1.5rem' }}>
+          <form action={deleteDocumentAction}>
             <input type="hidden" name="id" value={document.id} />
-            <button type="submit">Usuń dokument</button>
+            <button type="submit" className={buttonSecondaryClassName}>
+              Usuń dokument
+            </button>
           </form>
         </>
       )}
-    </main>
+    </PageShell>
   )
 }

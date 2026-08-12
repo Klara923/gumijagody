@@ -24,9 +24,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pl" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="bg-background text-foreground flex min-h-full flex-col">
+      <body className="flex min-h-full flex-col bg-zinc-50 font-sans text-zinc-900">
         <AppNav />
-        {children}
+        <div className="flex-1">{children}</div>
       </body>
     </html>
   )

@@ -1,6 +1,10 @@
 import { z } from 'zod'
 import { isValidBankAccount, isValidNip, normalizeBankAccount, toCents } from '@/server/validation'
 
+function emptyToUndefined<T extends z.ZodTypeAny>(schema: T) {
+  return z.preprocess((value) => (value === '' || value === null ? undefined : value), schema)
+}
+
 const dateOnly = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/, 'Data musi być w formacie RRRR-MM-DD')
@@ -16,15 +20,15 @@ const dateOnly = z
 export const listDocumentsQuerySchema = z
   .object({
     stage: z.enum(['BUFFER', 'ACCEPTED']),
-    sortBy: z.enum(['issueDate', 'dueDate']).default('issueDate'),
-    sortOrder: z.enum(['asc', 'desc']).default('desc'),
-    typeId: z.string().trim().min(1).optional(),
-    contractorId: z.string().trim().min(1).optional(),
-    categoryId: z.string().trim().min(1).optional(),
-    issueDateFrom: dateOnly.optional(),
-    issueDateTo: dateOnly.optional(),
-    dueDateFrom: dateOnly.optional(),
-    dueDateTo: dateOnly.optional(),
+    sortBy: emptyToUndefined(z.enum(['issueDate', 'dueDate'])).default('issueDate'),
+    sortOrder: emptyToUndefined(z.enum(['asc', 'desc'])).default('desc'),
+    typeId: emptyToUndefined(z.string().trim().min(1).optional()),
+    contractorId: emptyToUndefined(z.string().trim().min(1).optional()),
+    categoryId: emptyToUndefined(z.string().trim().min(1).optional()),
+    issueDateFrom: emptyToUndefined(dateOnly.optional()),
+    issueDateTo: emptyToUndefined(dateOnly.optional()),
+    dueDateFrom: emptyToUndefined(dateOnly.optional()),
+    dueDateTo: emptyToUndefined(dateOnly.optional()),
   })
   .refine(
     (query) =>

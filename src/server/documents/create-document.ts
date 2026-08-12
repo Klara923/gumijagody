@@ -31,6 +31,9 @@ export async function createDocument(input: CreateDocumentInput) {
         throw new DocumentError('Dokument musi być powiązany z kontrahentem', 400)
       }
 
+      const contractor = await tx.contractor.findUniqueOrThrow({ where: { id: contractorId } })
+      const categoryId = input.categoryId ?? contractor.defaultCategoryId ?? null
+
       const document = await tx.document.create({
         data: {
           number: input.number,
@@ -43,7 +46,7 @@ export async function createDocument(input: CreateDocumentInput) {
           grossAmount: input.grossAmount,
           currency: input.currency,
           paymentAccount: input.paymentAccount ?? null,
-          categoryId: input.categoryId ?? null,
+          categoryId,
           source: 'MANUAL',
           stage: 'ACCEPTED',
           acceptedAt: new Date(),

@@ -13,6 +13,16 @@ const systemTypes = [
   { name: 'Faktura kosztowa', direction: 'PAYABLE' as const },
 ]
 
+async function ensureCategory(name: string, parentId: string | null = null) {
+  const existing = await prisma.category.findFirst({
+    where: { name, parentId },
+  })
+  if (existing) return existing
+  return prisma.category.create({
+    data: { name, parentId },
+  })
+}
+
 async function main() {
   for (const type of systemTypes) {
     await prisma.documentType.upsert({
@@ -30,6 +40,13 @@ async function main() {
   }
 
   console.log(`Seed: ${systemTypes.length} typy systemowe dokumentów`)
+
+  const materials = await ensureCategory('Materiały')
+  const services = await ensureCategory('Usługi')
+  await ensureCategory('Opakowania', materials.id)
+  await ensureCategory('Transport', services.id)
+
+  console.log('Seed: przykładowe drzewo kategorii (Materiały/Opakowania, Usługi/Transport)')
 }
 
 main()

@@ -1,4 +1,12 @@
+import {
+  Alert,
+  Field,
+  PageShell,
+  buttonClassName,
+  controlClassName,
+} from '@/components/ui-kit'
 import { createDocumentAction } from '@/server/documents/actions'
+import { listCategoryOptions } from '@/server/categories/list-categories'
 import { getPrisma } from '@/server/infrastructure/db/prisma'
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>
@@ -11,20 +19,18 @@ export default async function NewDocumentPage({ searchParams }: { searchParams: 
   const params = await searchParams
   const error = first(params.error)
   const types = await getPrisma().documentType.findMany({ orderBy: { name: 'asc' } })
+  const categories = await listCategoryOptions()
 
   return (
-    <main style={{ padding: '1rem', maxWidth: 560 }}>
-      <h1>Nowy dokument</h1>
-      {error && <p style={{ color: 'crimson' }}>{error}</p>}
+    <PageShell title="Nowy dokument" description="Ręczne dodanie trafia od razu do rejestru.">
+      {error && <Alert>{error}</Alert>}
 
-      <form action={createDocumentAction} style={{ display: 'grid', gap: '0.75rem' }}>
-        <label>
-          Numer
-          <input name="number" required style={{ display: 'block', width: '100%' }} />
-        </label>
-        <label>
-          Typ
-          <select name="typeId" required style={{ display: 'block', width: '100%' }}>
+      <form action={createDocumentAction} className="grid gap-3 rounded-lg border border-zinc-200 bg-white p-4">
+        <Field label="Numer">
+          <input name="number" required className={controlClassName} />
+        </Field>
+        <Field label="Typ">
+          <select name="typeId" required className={controlClassName}>
             <option value="">Wybierz…</option>
             {types.map((type) => (
               <option key={type.id} value={type.id}>
@@ -32,46 +38,45 @@ export default async function NewDocumentPage({ searchParams }: { searchParams: 
               </option>
             ))}
           </select>
-        </label>
-        <label>
-          Kontrahent — nazwa
-          <input name="contractorName" required style={{ display: 'block', width: '100%' }} />
-        </label>
-        <label>
-          Kontrahent — NIP (opcjonalnie)
-          <input name="contractorNip" style={{ display: 'block', width: '100%' }} />
-        </label>
-        <label>
-          Data wystawienia
-          <input type="date" name="issueDate" required style={{ display: 'block', width: '100%' }} />
-        </label>
-        <label>
-          Termin płatności
-          <input type="date" name="dueDate" style={{ display: 'block', width: '100%' }} />
-        </label>
-        <label>
-          Netto
-          <input name="netAmount" required placeholder="100.00" style={{ display: 'block', width: '100%' }} />
-        </label>
-        <label>
-          VAT
-          <input name="vatAmount" required placeholder="23.00" style={{ display: 'block', width: '100%' }} />
-        </label>
-        <label>
-          Brutto
-          <input
-            name="grossAmount"
-            required
-            placeholder="123.00"
-            style={{ display: 'block', width: '100%' }}
-          />
-        </label>
-        <label>
-          Waluta
-          <input name="currency" defaultValue="PLN" style={{ display: 'block', width: '100%' }} />
-        </label>
-        <button type="submit">Zapisz</button>
+        </Field>
+        <Field label="Kontrahent — nazwa">
+          <input name="contractorName" required className={controlClassName} />
+        </Field>
+        <Field label="Kontrahent — NIP (opcjonalnie)">
+          <input name="contractorNip" className={controlClassName} />
+        </Field>
+        <Field label="Kategoria (opcjonalnie)">
+          <select name="categoryId" defaultValue="" className={controlClassName}>
+            <option value="">— brak / wg reguły kontrahenta —</option>
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.label}
+              </option>
+            ))}
+          </select>
+        </Field>
+        <Field label="Data wystawienia">
+          <input type="date" name="issueDate" required className={controlClassName} />
+        </Field>
+        <Field label="Termin płatności">
+          <input type="date" name="dueDate" className={controlClassName} />
+        </Field>
+        <Field label="Netto">
+          <input name="netAmount" required placeholder="100.00" className={controlClassName} />
+        </Field>
+        <Field label="VAT">
+          <input name="vatAmount" required placeholder="23.00" className={controlClassName} />
+        </Field>
+        <Field label="Brutto">
+          <input name="grossAmount" required placeholder="123.00" className={controlClassName} />
+        </Field>
+        <Field label="Waluta">
+          <input name="currency" defaultValue="PLN" className={controlClassName} />
+        </Field>
+        <button type="submit" className={buttonClassName}>
+          Zapisz
+        </button>
       </form>
-    </main>
+    </PageShell>
   )
 }

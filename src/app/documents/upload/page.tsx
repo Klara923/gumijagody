@@ -1,3 +1,10 @@
+import {
+  Alert,
+  Field,
+  PageShell,
+  buttonClassName,
+  controlClassName,
+} from '@/components/ui-kit'
 import { uploadDocumentAction } from '@/server/documents/actions'
 import { getPrisma } from '@/server/infrastructure/db/prisma'
 
@@ -17,85 +24,68 @@ export default async function UploadDocumentPage({
   const types = await getPrisma().documentType.findMany({ orderBy: { name: 'asc' } })
 
   return (
-    <main style={{ padding: '1rem', maxWidth: 640 }}>
-      <h1>Upload PDF / XML</h1>
-      <p>
-        XML FA(2)/FA(3) trafia do bufora z danymi wyciągniętymi z pliku. PDF wymaga ręcznego
-        uzupełnienia pól poniżej.
-      </p>
-      {error && <p style={{ color: 'crimson' }}>{error}</p>}
+    <PageShell
+      title="Upload PDF / XML"
+      description="XML FA wgrywa dane automatycznie. PDF wymaga metadanych poniżej. Pliki testowe: fixtures/ksef/."
+    >
+      {error && <Alert>{error}</Alert>}
 
-      <form action={uploadDocumentAction} style={{ display: 'grid', gap: '0.75rem' }}>
-        <label>
-          Plik (PDF lub XML)
+      <form action={uploadDocumentAction} className="grid gap-3 rounded-lg border border-zinc-200 bg-white p-4">
+        <Field label="Plik (PDF lub XML)">
           <input
             type="file"
             name="file"
             accept=".pdf,.xml,application/pdf,application/xml,text/xml"
             required
-            style={{ display: 'block', width: '100%' }}
+            className={controlClassName}
           />
-        </label>
+        </Field>
 
-        <fieldset style={{ border: '1px solid #ccc', padding: '0.75rem' }}>
-          <legend>Metadane (wymagane dla PDF)</legend>
-          <div style={{ display: 'grid', gap: '0.75rem' }}>
-            <label>
-              Numer
-              <input name="number" style={{ display: 'block', width: '100%' }} />
-            </label>
-            <label>
-              Typ
-              <select name="typeId" style={{ display: 'block', width: '100%' }}>
-                <option value="">Wybierz…</option>
-                {types.map((type) => (
-                  <option key={type.id} value={type.id}>
-                    {type.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Kontrahent — nazwa
-              <input name="contractorName" style={{ display: 'block', width: '100%' }} />
-            </label>
-            <label>
-              Kontrahent — NIP
-              <input name="contractorNip" style={{ display: 'block', width: '100%' }} />
-            </label>
-            <label>
-              Data wystawienia
-              <input type="date" name="issueDate" style={{ display: 'block', width: '100%' }} />
-            </label>
-            <label>
-              Termin płatności
-              <input type="date" name="dueDate" style={{ display: 'block', width: '100%' }} />
-            </label>
-            <label>
-              Netto
-              <input name="netAmount" placeholder="100.00" style={{ display: 'block', width: '100%' }} />
-            </label>
-            <label>
-              VAT
-              <input name="vatAmount" placeholder="23.00" style={{ display: 'block', width: '100%' }} />
-            </label>
-            <label>
-              Brutto
-              <input
-                name="grossAmount"
-                placeholder="123.00"
-                style={{ display: 'block', width: '100%' }}
-              />
-            </label>
-            <label>
-              Waluta
-              <input name="currency" defaultValue="PLN" style={{ display: 'block', width: '100%' }} />
-            </label>
-          </div>
+        <fieldset className="grid gap-3 rounded-md border border-zinc-200 p-3">
+          <legend className="px-1 text-sm font-medium text-zinc-700">Metadane (wymagane dla PDF)</legend>
+          <Field label="Numer">
+            <input name="number" className={controlClassName} />
+          </Field>
+          <Field label="Typ">
+            <select name="typeId" className={controlClassName}>
+              <option value="">Wybierz…</option>
+              {types.map((type) => (
+                <option key={type.id} value={type.id}>
+                  {type.name}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Kontrahent — nazwa">
+            <input name="contractorName" className={controlClassName} />
+          </Field>
+          <Field label="Kontrahent — NIP">
+            <input name="contractorNip" className={controlClassName} />
+          </Field>
+          <Field label="Data wystawienia">
+            <input type="date" name="issueDate" className={controlClassName} />
+          </Field>
+          <Field label="Termin płatności">
+            <input type="date" name="dueDate" className={controlClassName} />
+          </Field>
+          <Field label="Netto">
+            <input name="netAmount" placeholder="100.00" className={controlClassName} />
+          </Field>
+          <Field label="VAT">
+            <input name="vatAmount" placeholder="23.00" className={controlClassName} />
+          </Field>
+          <Field label="Brutto">
+            <input name="grossAmount" placeholder="123.00" className={controlClassName} />
+          </Field>
+          <Field label="Waluta">
+            <input name="currency" defaultValue="PLN" className={controlClassName} />
+          </Field>
         </fieldset>
 
-        <button type="submit">Wgraj do bufora</button>
+        <button type="submit" className={buttonClassName}>
+          Wgraj do bufora
+        </button>
       </form>
-    </main>
+    </PageShell>
   )
 }

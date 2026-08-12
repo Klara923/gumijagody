@@ -1,3 +1,10 @@
+import {
+  Alert,
+  Field,
+  PageShell,
+  buttonClassName,
+  controlClassName,
+} from '@/components/ui-kit'
 import { importFromKsefAction } from '@/server/documents/actions'
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>
@@ -25,53 +32,47 @@ export default async function KsefImportPage({ searchParams }: { searchParams: S
   const importError = first(params.importError)
 
   return (
-    <main style={{ padding: '1rem', maxWidth: 560 }}>
-      <h1>Pobieranie z KSeF</h1>
-      <p>
-        Pobierz faktury kosztowe lub sprzedażowe z zakresu dat. Trafiają do bufora; duplikaty (ten
-        sam numer KSeF) są pomijane.
-      </p>
-
-      {error && <p style={{ color: 'crimson' }}>{error}</p>}
+    <PageShell
+      title="Pobieranie z KSeF"
+      description="Faktury kosztowe lub sprzedażowe z zakresu dat trafiają do bufora. Duplikaty (ten sam numer KSeF) są pomijane."
+    >
+      {error && <Alert>{error}</Alert>}
       {imported !== undefined && (
-        <p>
+        <Alert tone="ok">
           Znaleziono {found ?? '?'}, zaimportowano {imported}, duplikaty {duplicates ?? '0'}.
-        </p>
+        </Alert>
       )}
-      {importError && (
-        <pre style={{ whiteSpace: 'pre-wrap', color: 'crimson', fontSize: 13 }}>{importError}</pre>
-      )}
+      {importError && <Alert>{importError}</Alert>}
 
-      <form action={importFromKsefAction} style={{ display: 'grid', gap: '0.75rem' }}>
-        <label>
-          Od
+      <form action={importFromKsefAction} className="grid gap-3 rounded-lg border border-zinc-200 bg-white p-4">
+        <Field label="Od">
           <input
             type="date"
             name="rangeFrom"
             required
             defaultValue={daysAgoIso(30)}
-            style={{ display: 'block', width: '100%' }}
+            className={controlClassName}
           />
-        </label>
-        <label>
-          Do
+        </Field>
+        <Field label="Do">
           <input
             type="date"
             name="rangeTo"
             required
             defaultValue={todayIso()}
-            style={{ display: 'block', width: '100%' }}
+            className={controlClassName}
           />
-        </label>
-        <label>
-          Rodzaj
-          <select name="invoiceKind" required defaultValue="COST" style={{ display: 'block', width: '100%' }}>
+        </Field>
+        <Field label="Rodzaj">
+          <select name="invoiceKind" required defaultValue="COST" className={controlClassName}>
             <option value="COST">Kosztowe (jako nabywca)</option>
             <option value="SALES">Sprzedażowe (jako sprzedawca)</option>
           </select>
-        </label>
-        <button type="submit">Pobierz do bufora</button>
+        </Field>
+        <button type="submit" className={buttonClassName}>
+          Pobierz do bufora
+        </button>
       </form>
-    </main>
+    </PageShell>
   )
 }
