@@ -50,3 +50,36 @@ export const authTokensSchema = z.object({
 export type PublicKeyCertificate = z.infer<typeof publicKeyCertificateSchema>
 export type KsefToken = z.infer<typeof tokenSchema>
 export type AuthStatus = z.infer<typeof authStatusSchema>
+
+export const invoiceMetadataSchema = z
+  .object({
+    ksefNumber: z.string().min(1),
+    invoiceNumber: z.string().min(1),
+    issueDate: z.string().min(1),
+    netAmount: z.number(),
+    vatAmount: z.number(),
+    grossAmount: z.number(),
+    currency: z.string().min(1),
+    seller: z.object({
+      nip: z.string().min(1),
+      name: z.string().nullish(),
+    }),
+    buyer: z.object({
+      identifier: z.object({
+        type: z.string().min(1),
+        value: z.string().nullish(),
+      }),
+      name: z.string().nullish(),
+    }),
+  })
+  .passthrough()
+
+export const queryInvoicesMetadataResponseSchema = z.object({
+  hasMore: z.boolean(),
+  isTruncated: z.boolean(),
+  permanentStorageHwmDate: z.string().nullish(),
+  invoices: z.array(invoiceMetadataSchema),
+})
+
+export type InvoiceMetadata = z.infer<typeof invoiceMetadataSchema>
+export type QueryInvoicesMetadataResponse = z.infer<typeof queryInvoicesMetadataResponseSchema>

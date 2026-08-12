@@ -1,19 +1,10 @@
-import { createHash } from 'node:crypto'
-
-import type { AttachmentKind, DocumentDirection } from '@/generated/prisma/client'
-import { getEnv } from '@/server/env'
+import type { AttachmentKind } from '@/generated/prisma/client'
 import { getPrisma } from '@/server/infrastructure/db/prisma'
-import {
-  isValidBankAccount,
-  isValidNip,
-  normalizeBankAccount,
-  toCents,
-} from '@/server/validation'
 
 import { resolveContractor } from './contractors'
 import { DocumentError, isPrismaUniqueViolation } from './errors'
+import { ingestFaXmlDocument, checksumOf } from './ingest-fa-xml'
 import { DOCUMENT_INCLUDE, mapDocument } from './mapper'
-import { parseFaXml } from './parse-fa-xml'
 import {
   uploadPdfMetadataSchema,
   type UploadPdfMetadata,
@@ -25,21 +16,6 @@ export type UploadFile = {
   filename: string
   mimeType: string
   content: Buffer
-}
-
-function checksumOf(content: Buffer): string {
-  return createHash('sha256').update(content).digest('hex')
-}
-
-function parseDateOnly(value: string, field: string): Date {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-    throw new DocumentError(`${field} musi być w formacie RRRR-MM-DD`, 400)
-  }
-  const date = new Date(`${value}T00:00:00.000Z`)
-  if (Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== value) {
-    throw new DocumentError(`"${value}" nie jest istniejącą datą (${field})`, 400)
-  }
-  return date
 }
 
 function extensionOf(filename: string): string {
@@ -59,37 +35,6 @@ function isXmlFile(file: UploadFile): boolean {
 function isPdfFile(file: UploadFile): boolean {
   const ext = extensionOf(file.filename)
   return ext === 'pdf' || file.mimeType === 'application/pdf'
-}
-
-async function requireSystemType(direction: DocumentDirection) {
-  const type = await getPrisma().documentType.findFirst({
-    where: { direction, isSystem: true },
-    orderBy: { createdAt: 'asc' },
-  })
-  if (!type) {
-    throw new DocumentError(
-      `Brak systemowego typu dokumentu dla kierunku ${direction}`,
-      500,
-    )
-  }
-  return type
-}
-
-function contractorFromParty(party: { name: string; nip?: string }) {
-  const nip = party.nip?.replace(/[\s-]/g, '')
-  if (nip && !isValidNip(nip)) {
-    throw new DocumentError(`NIP kontrahenta z XML ma niepoprawną sumę kontrolną: ${nip}`, 400)
-  }
-  return {
-    name: party.name,
-    ...(nip ? { nip } : {}),
-  }
-}
-
-function optionalValidAccount(value: string | undefined): string | undefined {
-  if (!value) return undefined
-  if (!isValidBankAccount(value)) return undefined
-  return normalizeBankAccount(value)
 }
 
 async function ensureUniqueChecksum(checksum: string) {
@@ -197,70 +142,6 @@ async function createUploadDocument(input: {
   }
 }
 
-async function uploadXml(file: UploadFile) {
-  const xml = file.content.toString('utf8')
-  const parsed = parseFaXml(xml)
-  const ourNip = getEnv().KSEF_NIP
-
-  if (!ourNip) {
-    throw new DocumentError(
-      'Do rozpoznania kierunku faktury z XML ustaw KSEF_NIP w konfiguracji',
-      400,
-    )
-  }
-
-  const sellerNip = parsed.seller.nip
-  const buyerNip = parsed.buyer.nip
-  const weAreSeller = sellerNip === ourNip
-  const weAreBuyer = buyerNip === ourNip
-
-  if (weAreSeller === weAreBuyer) {
-    throw new DocumentError(
-      `Nie udało się ustalić kierunku faktury względem NIP ${ourNip} (sprzedawca/nabywca)`,
-      400,
-    )
-  }
-
-  const direction: DocumentDirection = weAreBuyer ? 'PAYABLE' : 'RECEIVABLE'
-  const type = await requireSystemType(direction)
-  const counterparty = weAreBuyer ? parsed.seller : parsed.buyer
-  const issueDate = parseDateOnly(parsed.issueDate, 'Data wystawienia')
-  const dueDate = parsed.dueDate
-    ? parseDateOnly(parsed.dueDate, 'Termin płatności')
-    : undefined
-
-  if (dueDate && dueDate.getTime() < issueDate.getTime()) {
-    throw new DocumentError(
-      'Termin płatności nie może być wcześniejszy niż data wystawienia',
-      400,
-    )
-  }
-
-  if (toCents(parsed.netAmount) + toCents(parsed.vatAmount) !== toCents(parsed.grossAmount)) {
-    throw new DocumentError('Kwoty z XML nie sumują się (netto + VAT ≠ brutto)', 400)
-  }
-
-  return createUploadDocument({
-    number: parsed.number,
-    typeId: type.id,
-    contractor: contractorFromParty(counterparty),
-    issueDate,
-    ...(dueDate ? { dueDate } : {}),
-    netAmount: parsed.netAmount,
-    vatAmount: parsed.vatAmount,
-    grossAmount: parsed.grossAmount,
-    currency: parsed.currency,
-    paymentAccount: optionalValidAccount(parsed.paymentAccount),
-    attachment: {
-      kind: 'KSEF_XML',
-      filename: file.filename,
-      mimeType: file.mimeType || 'application/xml',
-      content: file.content,
-      checksum: checksumOf(file.content),
-    },
-  })
-}
-
 async function uploadPdf(file: UploadFile, metadata: UploadPdfMetadata) {
   return createUploadDocument({
     number: metadata.number,
@@ -298,7 +179,18 @@ export async function uploadDocument(file: UploadFile, pdfMetadata?: unknown) {
   await ensureUniqueChecksum(checksumOf(file.content))
 
   if (isXmlFile(file)) {
-    return uploadXml(file)
+    const result = await ingestFaXmlDocument({
+      xml: file.content,
+      filename: file.filename,
+      source: 'UPLOAD',
+      enforceChecksumUniqueness: false,
+    })
+    if (result.status === 'duplicate') {
+      throw new DocumentError('Ten dokument został już wgrany wcześniej', 409, [
+        result.documentId,
+      ])
+    }
+    return result.document
   }
 
   if (isPdfFile(file)) {

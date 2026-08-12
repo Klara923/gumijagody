@@ -6,6 +6,7 @@ const links = [
   { href: '/buffer', label: 'Bufor' },
   { href: '/documents/new', label: 'Nowy dokument' },
   { href: '/documents/upload', label: 'Upload' },
+  { href: '/ksef/import', label: 'KSeF' },
 ]
 
 export function AppNav() {

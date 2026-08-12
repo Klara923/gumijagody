@@ -88,3 +88,50 @@ export async function ksefFetch<S extends z.ZodType>(
 
   return parsed.data
 }
+
+export async function ksefFetchXml(
+  baseUrl: string,
+  path: string,
+  options: {
+    bearer: string
+    signal?: AbortSignal
+    timeoutMs?: number
+  },
+): Promise<Buffer> {
+  const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS
+  const timeout = AbortSignal.timeout(timeoutMs)
+  const combined = options.signal ? AbortSignal.any([options.signal, timeout]) : timeout
+
+  let response: Response
+  let bytes: ArrayBuffer
+  try {
+    response = await fetch(`${baseUrl}${path}`, {
+      method: 'GET',
+      signal: combined,
+      headers: {
+        Accept: 'application/xml',
+        'X-Error-Format': 'problem-details',
+        Authorization: `Bearer ${options.bearer}`,
+      },
+    })
+    bytes = await response.arrayBuffer()
+  } catch (cause) {
+    if (options.signal?.aborted) throw cause
+    if (timeout.aborted) {
+      throw new KsefError(`KSeF nie odpowiedział w ciągu ${timeoutMs} ms (GET ${path})`, {
+        cause,
+      })
+    }
+    throw new KsefError(`Nie udało się połączyć z KSeF (GET ${path})`, { cause })
+  }
+
+  if (!response.ok) {
+    const raw = Buffer.from(bytes).toString('utf8')
+    throw new KsefError(`GET ${path} zakończone kodem HTTP ${response.status}`, {
+      httpStatus: response.status,
+      details: raw ? [truncate(raw)] : undefined,
+    })
+  }
+
+  return Buffer.from(bytes)
+}

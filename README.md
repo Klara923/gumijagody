@@ -126,8 +126,14 @@ walidacji, Tailwind CSS z shadcn/ui, Docker Compose do uruchomienia lokalnego.
 
 ## Znane ograniczenia
 
-- Schemat bazy zawiera na razie samo połączenie i generator — model domenowy powstaje w kolejnym
-  kroku.
+- Model domenowy i główne ścieżki (rejestr, bufor, upload, ręczne pobieranie z KSeF) są
+  zaimplementowane; brakuje jeszcze m.in. harmonogramu, pełnej kategoryzacji UI i podglądu PDF/XML.
+- Ręczne pobieranie z KSeF używa `POST /invoices/query/metadata` + pobrania XML po numerze KSeF
+  (nie paczki eksportu). Przy limicie 10 000 rekordów klient kontynuuje zapytanie od daty ostatniego
+  rekordu; jeśli mimo to wynik pozostaje ucięty, import zapisuje ostrzeżenie w `ImportRun.error`.
+- Server Actions przechwytujące błędy muszą przepuszczać wyjątki `redirect()` Next.js
+  (`isRedirectError` z wewnętrznego modułu `next/dist/...`) — inaczej udany redirect wygląda jak
+  błąd `NEXT_REDIRECT`.
 - Obraz Dockera jest deweloperski (hot reload), nie produkcyjny wielostopniowy build.
 - Kontener używa `npm install` zamiast `npm ci`: lockfile generowany na macOS/arm64 nie zawiera
   opcjonalnych zależności platformowych, których npm żąda na Linuksie.

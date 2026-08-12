@@ -11,6 +11,9 @@
 /build
 
 .DS_Store
+**/.DS_Store
+* copy.*
+* Copy.*
 *.pem
 .backup
 scaffold-tmp

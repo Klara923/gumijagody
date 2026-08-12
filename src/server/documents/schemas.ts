@@ -212,3 +212,16 @@ export const uploadPdfMetadataSchema = z
   })
 
 export type UploadPdfMetadata = z.infer<typeof uploadPdfMetadataSchema>
+
+export const importFromKsefBodySchema = z
+  .object({
+    rangeFrom: dateOnly,
+    rangeTo: dateOnly,
+    invoiceKind: z.enum(['COST', 'SALES']),
+  })
+  .refine((body) => body.rangeTo.getTime() >= body.rangeFrom.getTime(), {
+    message: 'Data końcowa nie może być wcześniejsza niż początkowa',
+    path: ['rangeTo'],
+  })
+
+export type ImportFromKsefInput = z.infer<typeof importFromKsefBodySchema>

@@ -1,19 +1,23 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { isRedirectError } from 'next/dist/client/components/redirect-error'
 import { redirect } from 'next/navigation'
 
 import { acceptDocuments } from '@/server/documents/accept-documents'
 import { createDocument } from '@/server/documents/create-document'
 import { deleteDocument } from '@/server/documents/delete-document'
 import { DocumentError } from '@/server/documents/errors'
-import { updateDocument } from '@/server/documents/update-document'
-import { uploadDocument } from '@/server/documents/upload-document'
+import { importFromKsef } from '@/server/documents/import-from-ksef'
 import {
   acceptDocumentsBodySchema,
   createDocumentBodySchema,
+  importFromKsefBodySchema,
   updateDocumentBodySchema,
 } from '@/server/documents/schemas'
+import { updateDocument } from '@/server/documents/update-document'
+import { uploadDocument } from '@/server/documents/upload-document'
+import { KsefError } from '@/server/infrastructure/ksef/errors'
 
 function formString(formData: FormData, key: string) {
   const value = formData.get(key)
@@ -26,12 +30,16 @@ function optionalFormString(formData: FormData, key: string) {
 }
 
 function redirectWithError(path: string, error: unknown): never {
+  if (isRedirectError(error)) throw error
+
   const message =
-    error instanceof DocumentError
+    error instanceof DocumentError || error instanceof KsefError
       ? error.message
-      : error instanceof Error
-        ? error.message
-        : 'Nieoczekiwany błąd'
+      : typeof error === 'string'
+        ? error
+        : error instanceof Error
+          ? error.message
+          : 'Nieoczekiwany błąd'
   redirect(`${path}?error=${encodeURIComponent(message)}`)
 }
 
@@ -172,5 +180,36 @@ export async function uploadDocumentAction(formData: FormData) {
     redirect(`/buffer?uploaded=${encodeURIComponent(document.id)}`)
   } catch (error) {
     redirectWithError('/documents/upload', error)
+  }
+}
+
+export async function importFromKsefAction(formData: FormData) {
+  const raw = {
+    rangeFrom: formString(formData, 'rangeFrom'),
+    rangeTo: formString(formData, 'rangeTo'),
+    invoiceKind: formString(formData, 'invoiceKind'),
+  }
+
+  const parsed = importFromKsefBodySchema.safeParse(raw)
+  if (!parsed.success) {
+    redirectWithError(
+      '/ksef/import',
+      parsed.error.issues[0]?.message ?? 'Nieprawidłowe dane',
+    )
+  }
+
+  try {
+    const result = await importFromKsef(parsed.data)
+    revalidatePath('/documents')
+    revalidatePath('/buffer')
+    const params = new URLSearchParams({
+      imported: String(result.importedCount),
+      duplicates: String(result.duplicateCount),
+      found: String(result.foundCount),
+    })
+    if (result.error) params.set('importError', result.error.slice(0, 500))
+    redirect(`/ksef/import?${params.toString()}`)
+  } catch (error) {
+    redirectWithError('/ksef/import', error)
   }
 }
