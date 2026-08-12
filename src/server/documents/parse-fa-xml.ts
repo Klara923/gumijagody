@@ -2,6 +2,22 @@ import { XMLParser } from 'fast-xml-parser'
 
 import { DocumentError } from '@/server/documents/errors'
 
+export type ParsedFaParty = {
+  name: string
+  nip?: string
+  address?: string
+}
+
+export type ParsedFaLine = {
+  lineNumber: string
+  name: string
+  unit?: string
+  quantity?: string
+  unitNetPrice?: string
+  netAmount?: string
+  vatRate?: string
+}
+
 export type ParsedFaInvoice = {
   number: string
   issueDate: string
@@ -11,14 +27,21 @@ export type ParsedFaInvoice = {
   grossAmount: string
   currency: string
   paymentAccount?: string
-  seller: { name: string; nip?: string }
-  buyer: { name: string; nip?: string }
+  formVariant?: string
+  seller: ParsedFaParty
+  buyer: ParsedFaParty
+  lines: ParsedFaLine[]
 }
 
 function asRecord(value: unknown): Record<string, unknown> | undefined {
   return value && typeof value === 'object' && !Array.isArray(value)
     ? (value as Record<string, unknown>)
     : undefined
+}
+
+function asArray(value: unknown): unknown[] {
+  if (value === undefined || value === null) return []
+  return Array.isArray(value) ? value : [value]
 }
 
 function firstValue(value: unknown): unknown {
@@ -37,6 +60,12 @@ function text(value: unknown): string | undefined {
   return undefined
 }
 
+function attr(value: unknown, name: string): string | undefined {
+  const nested = asRecord(firstValue(value))
+  if (!nested) return undefined
+  return text(nested[`@_${name}`]) ?? text(nested[name])
+}
+
 function optionalAmount(value: unknown): number | undefined {
   const raw = text(value)
   if (!raw) return undefined
@@ -53,7 +82,7 @@ function sumFields(node: Record<string, unknown>, keys: string[]): number {
   return keys.reduce((sum, key) => sum + (optionalAmount(node[key]) ?? 0), 0)
 }
 
-function party(node: unknown): { name: string; nip?: string } {
+function party(node: unknown): ParsedFaParty {
   const root = asRecord(firstValue(node))
   const identity = asRecord(firstValue(root?.DaneIdentyfikacyjne))
   const name =
@@ -62,7 +91,17 @@ function party(node: unknown): { name: string; nip?: string } {
     text(root?.Nazwa) ??
     'Nieznany kontrahent'
   const nip = text(identity?.NIP)?.replace(/[\s-]/g, '')
-  return { name, ...(nip ? { nip } : {}) }
+  const addressNode = asRecord(firstValue(root?.Adres))
+  const addressParts = [
+    text(addressNode?.AdresL1),
+    text(addressNode?.AdresL2),
+    text(addressNode?.KodKraju),
+  ].filter(Boolean)
+  return {
+    name,
+    ...(nip ? { nip } : {}),
+    ...(addressParts.length > 0 ? { address: addressParts.join(', ') } : {}),
+  }
 }
 
 function paymentAccount(fa: Record<string, unknown>): string | undefined {
@@ -72,6 +111,26 @@ function paymentAccount(fa: Record<string, unknown>): string | undefined {
     text(asRecord(firstValue(payment?.RachunekBankowy))?.NrRB) ??
     text(fa.NrRB)
   )
+}
+
+function lineItems(fa: Record<string, unknown>): ParsedFaLine[] {
+  return asArray(fa.FaWiersz)
+    .map((row) => {
+      const item = asRecord(row)
+      if (!item) return null
+      const name = text(item.P_7)
+      if (!name) return null
+      return {
+        lineNumber: text(item.NrWierszaFa) ?? '',
+        name,
+        ...(text(item.P_8A) ? { unit: text(item.P_8A) } : {}),
+        ...(text(item.P_8B) ? { quantity: text(item.P_8B) } : {}),
+        ...(text(item.P_9A) ? { unitNetPrice: text(item.P_9A) } : {}),
+        ...(text(item.P_11) ? { netAmount: text(item.P_11) } : {}),
+        ...(text(item.P_12) ? { vatRate: text(item.P_12) } : {}),
+      }
+    })
+    .filter((row): row is ParsedFaLine => row !== null)
 }
 
 function findRoots(parsed: unknown): {
@@ -148,6 +207,9 @@ export function parseFaXml(xml: string): ParsedFaInvoice {
   const dueDate =
     text(fa.P_6) ?? text(asRecord(firstValue(fa.Platnosc))?.TerminPlatnosci)
   const account = paymentAccount(fa)
+  const header = asRecord(firstValue(invoice.Naglowek))
+  const formVariant =
+    attr(header?.KodFormularza, 'kodSystemowy') ?? text(header?.KodFormularza)
 
   return {
     number,
@@ -158,7 +220,9 @@ export function parseFaXml(xml: string): ParsedFaInvoice {
     grossAmount: formatAmount(gross),
     currency: text(fa.KodWaluty) ?? 'PLN',
     ...(account ? { paymentAccount: account } : {}),
+    ...(formVariant ? { formVariant } : {}),
     seller: party(invoice.Podmiot1 ?? fa.Podmiot1),
     buyer: party(invoice.Podmiot2 ?? fa.Podmiot2),
+    lines: lineItems(fa),
   }
 }

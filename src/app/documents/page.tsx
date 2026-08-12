@@ -184,7 +184,10 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Se
                     {document.grossAmount} {document.currency}
                   </td>
                   <td className={tdClassName}>{document.source}</td>
-                  <td className={tdClassName}>
+                  <td className={`${tdClassName} space-x-2 whitespace-nowrap`}>
+                    <Link href={`/documents/${document.id}/preview`} className="underline">
+                      Podgląd
+                    </Link>
                     <Link href={`/documents/${document.id}`} className="underline">
                       Szczegóły
                     </Link>

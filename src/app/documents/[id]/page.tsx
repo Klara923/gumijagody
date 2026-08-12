@@ -53,9 +53,12 @@ export default async function DocumentDetailPage({
 
   return (
     <PageShell title={document.number} description={`Stage: ${document.stage} · Źródło: ${document.source}`}>
-      <p>
+      <p className="flex flex-wrap gap-3">
         <Link href={backHref} className="text-sm text-zinc-600 underline">
           ← Wróć
+        </Link>
+        <Link href={`/documents/${document.id}/preview`} className="text-sm text-zinc-600 underline">
+          Podgląd dokumentu
         </Link>
       </p>
 
