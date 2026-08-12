@@ -6,35 +6,19 @@ import { getEnv } from '@/server/env'
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient }
 
 /**
- * Neon copies `channel_binding=require` into pooled URLs. node-pg does not
- * support SCRAM-SHA-256-PLUS, so that flag fails auth with 28P01 even when
- * the password is correct. Vercel serverless can also omit TLS SNI; Neon then
- * returns the same password error unless the endpoint id is in the password.
+ * Neon pooled URLs include `channel_binding=require`. node-pg does not support
+ * SCRAM-SHA-256-PLUS, so that flag fails with 28P01 even when the password is
+ * correct. Only the query flag is stripped — the userinfo is left untouched.
  */
 export function sanitizeDatabaseUrl(connectionString: string): string {
-  let url: URL
-  try {
-    url = new URL(connectionString)
-  } catch {
-    return connectionString
-  }
+  const [base, query] = connectionString.split('?')
+  if (!query) return connectionString
 
-  url.searchParams.delete('channel_binding')
+  const params = query
+    .split('&')
+    .filter((part) => part.length > 0 && !part.startsWith('channel_binding='))
 
-  const host = url.hostname
-  if (host.endsWith('.neon.tech')) {
-    if (!url.searchParams.get('sslmode')) {
-      url.searchParams.set('sslmode', 'require')
-    }
-
-    const endpointId = host.split('.')[0]?.replace(/-pooler$/, '')
-    const password = url.password
-    if (endpointId && password && !password.startsWith('endpoint=')) {
-      url.password = `endpoint=${endpointId};${password}`
-    }
-  }
-
-  return url.toString()
+  return params.length > 0 ? `${base}?${params.join('&')}` : base
 }
 
 export function getPrisma(): PrismaClient {
