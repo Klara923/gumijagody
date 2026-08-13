@@ -3,7 +3,15 @@
 import Link from 'next/link'
 import { useRef, useState } from 'react'
 
-import { tableClassName, tdClassName, thClassName } from '@/components/ui-kit'
+import {
+  Card,
+  CardTitle,
+  tableClassName,
+  tdClassName,
+  textLinkClassName,
+  thClassName,
+  trClassName,
+} from '@/components/ui-kit'
 import { saveRegisterColumnsAction } from '@/server/table-preferences/actions'
 import {
   REGISTER_COLUMNS,
@@ -93,14 +101,14 @@ export function RegisterColumnsTable({
 
   return (
     <>
-      <section className="rounded-lg border border-zinc-200 bg-white p-4">
-        <h2 className="mb-1 text-sm font-semibold text-zinc-900">Kolumny</h2>
-        <p className="mb-3 text-sm text-zinc-600">
+      <Card>
+        <CardTitle>Kolumny</CardTitle>
+        <p className="mb-3 text-sm text-muted-foreground">
           Zaznacz lub odznacz kolumnę — tabela zmienia się od razu. Ustawienie zapisuje się samo.
         </p>
         <div className="flex flex-wrap gap-x-4 gap-y-2">
           {REGISTER_COLUMNS.map((column) => (
-            <label key={column.id} className="flex items-center gap-2 text-sm text-zinc-800">
+            <label key={column.id} className="flex items-center gap-2 text-sm text-foreground">
               <input
                 type="checkbox"
                 checked={visibleSet.has(column.id)}
@@ -110,10 +118,12 @@ export function RegisterColumnsTable({
             </label>
           ))}
         </div>
-        {error ? <p className="mt-2 text-sm text-red-700">{error}</p> : null}
-      </section>
+        <p className="mt-2 min-h-5 text-sm text-red-700" aria-live="polite">
+          {error}
+        </p>
+      </Card>
 
-      <div className="overflow-x-auto rounded-lg border border-zinc-200 bg-white">
+      <Card className="overflow-x-auto p-0">
         <table className={tableClassName}>
           <thead>
             <tr>
@@ -122,29 +132,29 @@ export function RegisterColumnsTable({
                   {getRegisterColumn(columnId).label}
                 </th>
               ))}
-              <th className={thClassName}></th>
+              <th className={`${thClassName} w-36`}>Akcje</th>
             </tr>
           </thead>
           <tbody>
             {documents.length === 0 ? (
               <tr>
                 <td className={tdClassName} colSpan={visibleColumns.length + 1}>
-                  Brak dokumentów w rejestrze
+                  Brak dokumentów w rejestrze. Dodaj ręcznie albo zaakceptuj pozycje z bufora.
                 </td>
               </tr>
             ) : (
               documents.map((document) => (
-                <tr key={document.id}>
+                <tr key={document.id} className={trClassName}>
                   {visibleColumns.map((columnId) => (
-                    <td key={columnId} className={tdClassName}>
+                    <td key={columnId} className={`${tdClassName} truncate`}>
                       {formatRegisterColumn(document, columnId)}
                     </td>
                   ))}
-                  <td className={`${tdClassName} space-x-2 whitespace-nowrap`}>
-                    <Link href={`/documents/${document.id}/preview`} className="underline">
+                  <td className={`${tdClassName} space-x-3 whitespace-nowrap`}>
+                    <Link href={`/documents/${document.id}/preview`} className={textLinkClassName}>
                       Podgląd
                     </Link>
-                    <Link href={`/documents/${document.id}`} className="underline">
+                    <Link href={`/documents/${document.id}`} className={textLinkClassName}>
                       Szczegóły
                     </Link>
                   </td>
@@ -153,7 +163,7 @@ export function RegisterColumnsTable({
             )}
           </tbody>
         </table>
-      </div>
+      </Card>
     </>
   )
 }

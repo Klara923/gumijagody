@@ -1,6 +1,5 @@
 import { ConfirmDelete } from '@/components/confirm-delete'
 import {
-  Alert,
   Card,
   CardTitle,
   Field,
@@ -72,14 +71,24 @@ export default async function CategoriesPage({ searchParams }: { searchParams: S
     <PageShell
       title="Kategorie kosztów"
       description="Drzewo kategorii oraz reguły ze słów kluczowych. Kontrahent → kategoria ma pierwszeństwo (strona Kontrahenci)."
+      flash={
+        error
+          ? { message: error }
+          : created
+            ? { tone: 'ok', message: 'Dodano kategorię.' }
+            : saved
+              ? { tone: 'ok', message: 'Zapisano kategorię.' }
+              : deleted
+                ? { tone: 'ok', message: 'Usunięto kategorię.' }
+                : ruleCreated
+                  ? { tone: 'ok', message: 'Dodano regułę słowa kluczowego.' }
+                  : ruleSaved
+                    ? { tone: 'ok', message: 'Zapisano regułę.' }
+                    : ruleDeleted
+                      ? { tone: 'ok', message: 'Usunięto regułę.' }
+                      : null
+      }
     >
-      {error && <Alert>{error}</Alert>}
-      {created && <Alert tone="ok">Dodano kategorię.</Alert>}
-      {saved && <Alert tone="ok">Zapisano kategorię.</Alert>}
-      {deleted && <Alert tone="ok">Usunięto kategorię.</Alert>}
-      {ruleCreated && <Alert tone="ok">Dodano regułę słowa kluczowego.</Alert>}
-      {ruleSaved && <Alert tone="ok">Zapisano regułę.</Alert>}
-      {ruleDeleted && <Alert tone="ok">Usunięto regułę.</Alert>}
 
       <Card>
         <CardTitle>Dodaj kategorię</CardTitle>

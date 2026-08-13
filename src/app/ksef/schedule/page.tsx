@@ -2,7 +2,6 @@ import Link from 'next/link'
 
 import { ConfirmDelete } from '@/components/confirm-delete'
 import {
-  Alert,
   Card,
   CardTitle,
   EnumBadge,
@@ -14,6 +13,7 @@ import {
   tableClassName,
   tdClassName,
   thClassName,
+  trClassName,
 } from '@/components/ui-kit'
 import { IMPORT_STATUS, INVOICE_KIND } from '@/lib/labels'
 import { getPrisma } from '@/server/infrastructure/db/prisma'
@@ -48,21 +48,25 @@ export default async function KsefSchedulePage({ searchParams }: { searchParams:
   return (
     <PageShell
       title="Harmonogram KSeF"
-      description="Wiele godzin na dobę (np. 01:00, 02:00, 03:00). Lokalnie: node-cron co minutę. Na Vercel: cron w vercel.json → POST /api/cron/ksef (wymaga CRON_SECRET)."
-    >
-      <p className="flex flex-wrap gap-2">
+      description="Wiele godzin na dobę. Lokalnie node-cron sprawdza minutę. Na Vercel Hobby cron woła raz na dobę — dodatkowe godziny ustawisz przez cron-job.org na POST /api/cron/ksef."
+      flash={
+        error
+          ? { message: error }
+          : saved
+            ? { tone: 'ok', message: 'Zapisano harmonogram.' }
+            : ran
+              ? {
+                  tone: 'ok',
+                  message: `Uruchomiono teraz — zaimportowano ${imported ?? '0'}, duplikaty ${duplicates ?? '0'}.`,
+                }
+              : null
+      }
+      actions={
         <Link href="/ksef/import" className={buttonSecondaryClassName}>
           Ręczny import
         </Link>
-      </p>
-
-      {error && <Alert>{error}</Alert>}
-      {saved && <Alert tone="ok">Zapisano harmonogram.</Alert>}
-      {ran && (
-        <Alert tone="ok">
-          Uruchomiono teraz — zaimportowano {imported ?? '0'}, duplikaty {duplicates ?? '0'}.
-        </Alert>
-      )}
+      }
+    >
 
       <Card>
         <CardTitle>Ustawienia</CardTitle>
@@ -193,7 +197,7 @@ export default async function KsefSchedulePage({ searchParams }: { searchParams:
                 </tr>
               ) : (
                 recentRuns.map((run) => (
-                  <tr key={run.id}>
+                  <tr key={run.id} className={trClassName}>
                     <td className={tdClassName}>{run.startedAt.toLocaleString('pl-PL')}</td>
                     <td className={tdClassName}>
                       <EnumBadge value={run.invoiceKind} labels={INVOICE_KIND} />

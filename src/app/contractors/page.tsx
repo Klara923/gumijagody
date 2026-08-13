@@ -1,11 +1,13 @@
 import {
-  Alert,
+  Card,
+  EmptyState,
   PageShell,
   buttonClassName,
   controlClassName,
   tableClassName,
   tdClassName,
   thClassName,
+  trClassName,
 } from '@/components/ui-kit'
 import { updateContractorDefaultCategoryAction } from '@/server/categories/actions'
 import { listCategoryOptions } from '@/server/categories/list-categories'
@@ -26,36 +28,38 @@ export default async function ContractorsPage({ searchParams }: { searchParams: 
 
   return (
     <PageShell
-      wide
       title="Kontrahenci — reguła kategorii"
-      description="Ustaw domyślną kategorię. Ma pierwszeństwo przed słowami kluczowymi (Kategorie). Przy uploadzie / imporcie KSeF dokument dostanie ją automatycznie."
+      description="Domyślna kategoria ma pierwszeństwo przed słowami kluczowymi. Przy uploadzie i imporcie KSeF dokument dostanie ją automatycznie."
+      flash={
+        error ? { message: error } : saved ? { tone: 'ok', message: 'Zapisano regułę.' } : null
+      }
     >
-      {error && <Alert>{error}</Alert>}
-      {saved && <Alert tone="ok">Zapisano regułę.</Alert>}
-
       {contractors.length === 0 ? (
-        <p className="text-sm text-zinc-600">Brak kontrahentów — pojawią się po dodaniu dokumentów.</p>
+        <EmptyState
+          title="Brak kontrahentów"
+          description="Pojawią się po dodaniu albo wgraniu dokumentu."
+        />
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-zinc-200 bg-white">
+        <Card className="overflow-x-auto p-0">
           <table className={tableClassName}>
             <thead>
               <tr>
                 <th className={thClassName}>Nazwa</th>
                 <th className={thClassName}>NIP</th>
-                <th className={thClassName}>Dokumenty</th>
+                <th className={`${thClassName} w-28`}>Dokumenty</th>
                 <th className={thClassName}>Domyślna kategoria</th>
               </tr>
             </thead>
             <tbody>
               {contractors.map((contractor) => (
-                <tr key={contractor.id}>
-                  <td className={tdClassName}>{contractor.name}</td>
-                  <td className={tdClassName}>{contractor.nip ?? '—'}</td>
-                  <td className={tdClassName}>{contractor.documentsCount}</td>
+                <tr key={contractor.id} className={trClassName}>
+                  <td className={`${tdClassName} truncate`}>{contractor.name}</td>
+                  <td className={`${tdClassName} tabular-nums`}>{contractor.nip ?? '—'}</td>
+                  <td className={`${tdClassName} tabular-nums`}>{contractor.documentsCount}</td>
                   <td className={tdClassName}>
                     <form
                       action={updateContractorDefaultCategoryAction}
-                      className="flex flex-wrap items-center gap-2"
+                      className="flex items-center gap-2"
                     >
                       <input type="hidden" name="contractorId" value={contractor.id} />
                       <select
@@ -79,7 +83,7 @@ export default async function ContractorsPage({ searchParams }: { searchParams: 
               ))}
             </tbody>
           </table>
-        </div>
+        </Card>
       )}
     </PageShell>
   )

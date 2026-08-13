@@ -11,7 +11,9 @@ import {
   buttonSecondaryClassName,
   tableClassName,
   tdClassName,
+  textLinkClassName,
   thClassName,
+  trClassName,
 } from '@/components/ui-kit'
 import { ATTACHMENT_KIND, DOCUMENT_SOURCE, DOCUMENT_STAGE } from '@/lib/labels'
 import { DocumentError } from '@/server/documents/errors'
@@ -73,7 +75,6 @@ export default async function DocumentPreviewPage({ params }: { params: RoutePar
 
   return (
     <PageShell
-      wide
       title={`Podgląd: ${document.number}`}
       description={structured.formVariant ? `Schemat ${structured.formVariant}` : undefined}
       meta={
@@ -82,15 +83,17 @@ export default async function DocumentPreviewPage({ params }: { params: RoutePar
           <EnumBadge value={document.source} labels={DOCUMENT_SOURCE} />
         </div>
       }
+      actions={
+        <>
+          <Link href={backHref} className={buttonSecondaryClassName}>
+            Wróć do listy
+          </Link>
+          <Link href={`/documents/${document.id}`} className={buttonSecondaryClassName}>
+            Szczegóły
+          </Link>
+        </>
+      }
     >
-      <div className="flex flex-wrap gap-2">
-        <Link href={backHref} className={buttonSecondaryClassName}>
-          ← Wróć do listy
-        </Link>
-        <Link href={`/documents/${document.id}`} className={buttonSecondaryClassName}>
-          Szczegóły / edycja
-        </Link>
-      </div>
 
       {!pdfAttachmentId && !xmlAttachmentId ? (
         <Alert tone="ok">
@@ -148,7 +151,7 @@ export default async function DocumentPreviewPage({ params }: { params: RoutePar
               </thead>
               <tbody>
                 {attachments.map((attachment) => (
-                  <tr key={attachment.id}>
+                  <tr key={attachment.id} className={trClassName}>
                     <td className={tdClassName}>{attachment.filename}</td>
                     <td className={tdClassName}>
                       <EnumBadge value={attachment.kind} labels={ATTACHMENT_KIND} />
@@ -160,7 +163,7 @@ export default async function DocumentPreviewPage({ params }: { params: RoutePar
                         href={`/api/documents/${document.id}/attachments/${attachment.id}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="underline"
+                        className={textLinkClassName}
                       >
                         Otwórz
                       </a>

@@ -97,7 +97,7 @@ export function ContractorLookupFields({
   return (
     <div className="grid gap-3">
       <Field label="Kontrahent — NIP">
-        <div className="flex flex-wrap gap-2">
+        <div className="flex gap-2">
           <input
             name="contractorNip"
             value={nip}
@@ -105,7 +105,7 @@ export function ContractorLookupFields({
             inputMode="numeric"
             autoComplete="off"
             placeholder="10 cyfr"
-            className={controlClassName}
+            className={`${controlClassName} min-w-0 flex-1`}
           />
           <button
             type="button"
@@ -117,8 +117,12 @@ export function ContractorLookupFields({
           </button>
         </div>
       </Field>
-      {error ? <p className="text-sm text-red-700">{error}</p> : null}
-      {status ? <p className="text-sm text-emerald-800">{status}</p> : null}
+      <p
+        className={`min-h-5 text-sm ${error ? 'text-red-700' : 'text-emerald-800'}`}
+        aria-live="polite"
+      >
+        {error ?? status}
+      </p>
       <Field label="Kontrahent — nazwa">
         <input
           name="contractorName"
@@ -136,25 +140,27 @@ export function ContractorLookupFields({
           className={controlClassName}
         />
       </Field>
-      <Field label="Kod pocztowy (opcjonalnie)">
-        <input
-          name="contractorPostalCode"
-          value={postalCode}
-          onChange={(event) => setPostalCode(event.target.value)}
-          placeholder="00-000"
-          className={controlClassName}
-        />
-      </Field>
-      <Field label="Miasto (opcjonalnie)">
-        <input
-          name="contractorCity"
-          value={city}
-          onChange={(event) => setCity(event.target.value)}
-          className={controlClassName}
-        />
-      </Field>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Field label="Kod pocztowy (opcjonalnie)">
+          <input
+            name="contractorPostalCode"
+            value={postalCode}
+            onChange={(event) => setPostalCode(event.target.value)}
+            placeholder="00-000"
+            className={controlClassName}
+          />
+        </Field>
+        <Field label="Miasto (opcjonalnie)">
+          <input
+            name="contractorCity"
+            value={city}
+            onChange={(event) => setCity(event.target.value)}
+            className={controlClassName}
+          />
+        </Field>
+      </div>
       <Field label="Rachunek kontrahenta (opcjonalnie)">
-        <div className="flex flex-wrap gap-2">
+        <div className="flex gap-2">
           <input
             name="contractorBankAccount"
             value={bankAccount}
@@ -163,7 +169,7 @@ export function ContractorLookupFields({
               setWhitelist(null)
               setWhitelistOk(null)
             }}
-            className={controlClassName}
+            className={`${controlClassName} min-w-0 flex-1`}
           />
           <button
             type="button"
@@ -174,9 +180,12 @@ export function ContractorLookupFields({
             {checking ? 'Sprawdzam…' : 'Sprawdź na białej liście'}
           </button>
         </div>
-        {whitelist ? (
-          <p className={whitelistOk ? 'text-sm text-emerald-800' : 'text-sm text-red-700'}>{whitelist}</p>
-        ) : null}
+        <p
+          className={`min-h-5 text-sm ${whitelistOk ? 'text-emerald-800' : 'text-red-700'}`}
+          aria-live="polite"
+        >
+          {whitelist}
+        </p>
       </Field>
     </div>
   )

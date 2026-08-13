@@ -1,6 +1,5 @@
 import { ConfirmDelete } from '@/components/confirm-delete'
 import {
-  Alert,
   Card,
   CardTitle,
   EnumBadge,
@@ -11,6 +10,7 @@ import {
   tableClassName,
   tdClassName,
   thClassName,
+  trClassName,
 } from '@/components/ui-kit'
 import { DOCUMENT_DIRECTION } from '@/lib/labels'
 import {
@@ -36,14 +36,20 @@ export default async function DocumentTypesPage({ searchParams }: { searchParams
 
   return (
     <PageShell
-      wide
       title="Typy dokumentów"
       description="Typ systemowy ma kierunek należność albo zobowiązanie. Własne typy (nota obciążeniowa, odsetkowa, karna) dodajesz tutaj i wybierasz na dokumencie."
+      flash={
+        error
+          ? { message: error }
+          : created
+            ? { tone: 'ok', message: 'Dodano typ.' }
+            : saved
+              ? { tone: 'ok', message: 'Zapisano typ.' }
+              : deleted
+                ? { tone: 'ok', message: 'Usunięto typ.' }
+                : null
+      }
     >
-      {error && <Alert>{error}</Alert>}
-      {created && <Alert tone="ok">Dodano typ.</Alert>}
-      {saved && <Alert tone="ok">Zapisano typ.</Alert>}
-      {deleted && <Alert tone="ok">Usunięto typ.</Alert>}
 
       <Card>
         <CardTitle>Dodaj własny typ</CardTitle>
@@ -75,7 +81,7 @@ export default async function DocumentTypesPage({ searchParams }: { searchParams
           </thead>
           <tbody>
             {types.map((type) => (
-              <tr key={type.id}>
+              <tr key={type.id} className={trClassName}>
                 <td className={tdClassName}>
                   {type.isSystem ? (
                     type.name

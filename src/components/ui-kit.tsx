@@ -1,27 +1,34 @@
 import type { ReactNode } from 'react'
 
-import { cn } from '@/lib/utils'
+import { Flash } from '@/components/flash'
 import type { BadgeTone } from '@/lib/labels'
+import { cn } from '@/lib/utils'
 
 export function PageShell({
   title,
   description,
   meta,
+  actions,
+  flash,
   children,
-  wide = false,
 }: {
   title: string
   description?: string
   meta?: ReactNode
+  actions?: ReactNode
+  flash?: { tone?: 'error' | 'ok'; message: string } | null
   children: ReactNode
-  wide?: boolean
 }) {
   return (
-    <main className={cn('mx-auto w-full px-4 py-8', wide ? 'max-w-5xl' : 'max-w-3xl')}>
-      <header className="space-y-2">
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">{title}</h1>
-        {description ? <p className="text-sm text-muted-foreground">{description}</p> : null}
-        {meta}
+    <main className="mx-auto w-full max-w-5xl px-4 py-8">
+      {flash?.message ? <Flash tone={flash.tone}>{flash.message}</Flash> : null}
+      <header className="flex flex-wrap items-start justify-between gap-4">
+        <div className="min-w-0 space-y-2">
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">{title}</h1>
+          {description ? <p className="max-w-2xl text-sm text-muted-foreground">{description}</p> : null}
+          {meta}
+        </div>
+        {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
       </header>
       <div className="mt-6 space-y-6">{children}</div>
     </main>
@@ -43,6 +50,24 @@ export function Card({ children, className }: { children: ReactNode; className?:
 
 export function CardTitle({ children }: { children: ReactNode }) {
   return <h2 className="mb-3 text-sm font-semibold text-foreground">{children}</h2>
+}
+
+export function EmptyState({
+  title,
+  description,
+  children,
+}: {
+  title: string
+  description?: string
+  children?: ReactNode
+}) {
+  return (
+    <Card className="grid justify-items-start gap-3 py-10">
+      <p className="text-sm font-medium text-foreground">{title}</p>
+      {description ? <p className="max-w-md text-sm text-muted-foreground">{description}</p> : null}
+      {children}
+    </Card>
+  )
 }
 
 const badgeToneClassName: Record<BadgeTone, string> = {
@@ -105,34 +130,42 @@ export function Alert({
 
 export function Field({
   label,
+  hint,
   children,
 }: {
   label: string
+  hint?: string
   children: ReactNode
 }) {
   return (
     <label className="grid gap-1 text-sm text-foreground">
       <span className="font-medium">{label}</span>
       {children}
+      {hint ? <span className="text-xs text-muted-foreground">{hint}</span> : null}
     </label>
   )
 }
 
 export const controlClassName =
-  'w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-2 focus:ring-ring/30'
+  'h-9 w-full min-w-0 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30'
 
 export const buttonClassName =
-  'inline-flex items-center justify-center rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90'
+  'inline-flex h-9 shrink-0 items-center justify-center rounded-md bg-primary px-3.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50'
 
 export const buttonSecondaryClassName =
-  'inline-flex items-center justify-center rounded-md border border-border bg-background px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted'
+  'inline-flex h-9 shrink-0 items-center justify-center rounded-md border border-border bg-background px-3.5 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-50'
 
 export const buttonDestructiveClassName =
-  'inline-flex items-center justify-center rounded-md border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/15'
+  'inline-flex h-9 shrink-0 items-center justify-center rounded-md border border-destructive/20 bg-destructive/10 px-3.5 text-sm font-medium text-destructive transition-colors hover:bg-destructive/15'
 
-export const tableClassName = 'w-full border-collapse text-left text-sm'
+export const textLinkClassName =
+  'text-sm font-medium text-foreground underline-offset-4 hover:underline'
+
+export const tableClassName = 'w-full min-w-[40rem] table-fixed border-collapse text-left text-sm'
 
 export const thClassName =
-  'border-b border-border bg-muted/70 px-3 py-2 font-medium text-muted-foreground'
+  'border-b border-border bg-muted/70 px-3 py-2.5 font-medium text-muted-foreground'
 
-export const tdClassName = 'border-b border-border/80 px-3 py-2 text-foreground'
+export const tdClassName = 'border-b border-border/80 px-3 py-2.5 text-foreground'
+
+export const trClassName = 'hover:bg-muted/40'

@@ -3,7 +3,6 @@ import { notFound } from 'next/navigation'
 
 import { ConfirmDelete } from '@/components/confirm-delete'
 import {
-  Alert,
   Card,
   EnumBadge,
   Field,
@@ -65,18 +64,18 @@ export default async function DocumentDetailPage({
           <EnumBadge value={document.source} labels={DOCUMENT_SOURCE} />
         </div>
       }
+      flash={error ? { message: error } : saved ? { tone: 'ok', message: 'Zapisano.' } : null}
+      actions={
+        <>
+          <Link href={backHref} className={buttonSecondaryClassName}>
+            Wróć
+          </Link>
+          <Link href={`/documents/${document.id}/preview`} className={buttonClassName}>
+            Podgląd
+          </Link>
+        </>
+      }
     >
-      <p className="flex flex-wrap gap-3">
-        <Link href={backHref} className={buttonSecondaryClassName}>
-          ← Wróć
-        </Link>
-        <Link href={`/documents/${document.id}/preview`} className={buttonSecondaryClassName}>
-          Podgląd dokumentu
-        </Link>
-      </p>
-
-      {error && <Alert>{error}</Alert>}
-      {saved && <Alert tone="ok">Zapisano.</Alert>}
 
       {!editable ? (
         <Card className="space-y-2 text-sm">
