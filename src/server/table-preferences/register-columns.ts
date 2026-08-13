@@ -1,3 +1,4 @@
+import { documentSourceLabel } from '@/lib/labels'
 import type { mapDocument } from '@/server/documents/mapper'
 
 export type RegisterDocument = ReturnType<typeof mapDocument>
@@ -55,7 +56,12 @@ export const REGISTER_COLUMNS = [
     defaultVisible: true,
     value: (doc: RegisterDocument) => `${doc.grossAmount} ${doc.currency}`,
   },
-  { id: 'source', label: 'Źródło', defaultVisible: true, value: (doc: RegisterDocument) => doc.source },
+  {
+    id: 'source',
+    label: 'Źródło',
+    defaultVisible: true,
+    value: (doc: RegisterDocument) => documentSourceLabel(doc.source),
+  },
   {
     id: 'ksefNumber',
     label: 'Numer KSeF',

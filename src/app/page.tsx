@@ -1,6 +1,6 @@
 import Link from 'next/link'
 
-import { PageShell, buttonSecondaryClassName } from '@/components/ui-kit'
+import { Card, PageShell, buttonSecondaryClassName } from '@/components/ui-kit'
 
 const links = [
   { href: '/documents', label: 'Rejestr', hint: 'zaakceptowane dokumenty' },
@@ -18,17 +18,15 @@ export default function Home() {
   return (
     <PageShell
       title="Gumijagoda"
-      description="Minimalny panel do testowania ścieżek: upload / KSeF → bufor → rejestr → kategorie."
+      description="Ewidencja faktur: pobieranie z KSeF i upload trafiają do bufora, po akceptacji do rejestru. Kategoria z reguły kontrahenta albo słowa kluczowego."
     >
-      <div className="grid gap-2 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-2">
         {links.map((link) => (
-          <Link
-            key={link.href}
-            href={link.href}
-            className="rounded-lg border border-zinc-200 bg-white px-4 py-3 hover:border-zinc-400"
-          >
-            <div className="text-sm font-medium text-zinc-900">{link.label}</div>
-            <div className="text-xs text-zinc-500">{link.hint}</div>
+          <Link key={link.href} href={link.href} className="group">
+            <Card className="h-full transition-colors group-hover:border-foreground/20">
+              <div className="text-sm font-medium text-foreground">{link.label}</div>
+              <div className="mt-1 text-xs text-muted-foreground">{link.hint}</div>
+            </Card>
           </Link>
         ))}
       </div>
@@ -36,9 +34,6 @@ export default function Home() {
         <Link href="/api/health" className={buttonSecondaryClassName}>
           Health check
         </Link>
-      </p>
-      <p className="text-xs text-zinc-500">
-        Fixture’y XML: <code className="rounded bg-zinc-100 px-1">fixtures/ksef/</code>
       </p>
     </PageShell>
   )

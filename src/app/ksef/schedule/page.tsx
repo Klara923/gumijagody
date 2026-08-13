@@ -1,7 +1,11 @@
 import Link from 'next/link'
 
+import { ConfirmDelete } from '@/components/confirm-delete'
 import {
   Alert,
+  Card,
+  CardTitle,
+  EnumBadge,
   Field,
   PageShell,
   buttonClassName,
@@ -11,6 +15,7 @@ import {
   tdClassName,
   thClassName,
 } from '@/components/ui-kit'
+import { IMPORT_STATUS, INVOICE_KIND } from '@/lib/labels'
 import { getPrisma } from '@/server/infrastructure/db/prisma'
 import {
   removeScheduleTimeAction,
@@ -59,10 +64,10 @@ export default async function KsefSchedulePage({ searchParams }: { searchParams:
         </Alert>
       )}
 
-      <section className="rounded-lg border border-zinc-200 bg-white p-4">
-        <h2 className="mb-3 text-sm font-semibold text-zinc-900">Ustawienia</h2>
+      <Card>
+        <CardTitle>Ustawienia</CardTitle>
         <form action={updateScheduleSettingsAction} className="grid max-w-lg gap-3">
-          <label className="flex items-center gap-2 text-sm text-zinc-800">
+          <label className="flex items-center gap-2 text-sm text-foreground">
             <input type="checkbox" name="enabled" defaultChecked={settings.enabled} />
             Włącz automatyczne pobieranie
           </label>
@@ -88,7 +93,7 @@ export default async function KsefSchedulePage({ searchParams }: { searchParams:
             />
           </Field>
 
-          <fieldset className="grid gap-2 text-sm text-zinc-800">
+          <fieldset className="grid gap-2 text-sm text-foreground">
             <legend className="font-medium">Rodzaje faktur</legend>
             <label className="flex items-center gap-2">
               <input
@@ -111,15 +116,15 @@ export default async function KsefSchedulePage({ searchParams }: { searchParams:
           </fieldset>
 
           <div className="space-y-2">
-            <p className="text-sm font-medium text-zinc-700">Godziny uruchomienia</p>
+            <p className="text-sm font-medium text-foreground">Godziny uruchomienia</p>
             {settings.runTimes.length === 0 ? (
-              <p className="text-sm text-zinc-500">Brak godzin — dodaj co najmniej jedną.</p>
+              <p className="text-sm text-muted-foreground">Brak godzin — dodaj co najmniej jedną.</p>
             ) : (
               <ul className="space-y-2">
                 {settings.runTimes.map((time) => (
                   <li key={time} className="flex items-center gap-2">
                     <input type="hidden" name="runTimes" value={time} />
-                    <span className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-sm">
+                    <span className="rounded-md border border-border bg-muted px-3 py-1.5 text-sm">
                       {time}
                     </span>
                   </li>
@@ -138,15 +143,17 @@ export default async function KsefSchedulePage({ searchParams }: { searchParams:
 
         {settings.runTimes.length > 0 ? (
           <div className="mt-4 space-y-2">
-            <p className="text-sm font-medium text-zinc-700">Usuń godzinę</p>
+            <p className="text-sm font-medium text-foreground">Usuń godzinę</p>
             <div className="flex flex-wrap gap-2">
               {settings.runTimes.map((time) => (
-                <form key={`remove-${time}`} action={removeScheduleTimeAction}>
-                  <input type="hidden" name="removeTime" value={time} />
-                  <button type="submit" className={buttonSecondaryClassName}>
-                    Usuń {time}
-                  </button>
-                </form>
+                <ConfirmDelete
+                  key={`remove-${time}`}
+                  action={removeScheduleTimeAction}
+                  fields={{ removeTime: time }}
+                  label={`Usuń ${time}`}
+                  title={`Usunąć godzinę ${time} z harmonogramu?`}
+                  description="Kolejne automatyczne pobrania o tej godzinie nie wystartują."
+                />
               ))}
             </div>
           </div>
@@ -158,15 +165,15 @@ export default async function KsefSchedulePage({ searchParams }: { searchParams:
           </button>
         </form>
 
-        <p className="mt-3 text-xs text-zinc-500">
+        <p className="mt-3 text-xs text-muted-foreground">
           Ostatnie uruchomienie:{' '}
           {settings.lastRunAt ? new Date(settings.lastRunAt).toLocaleString('pl-PL') : '—'}
         </p>
-      </section>
+      </Card>
 
       <section className="space-y-2">
-        <h2 className="text-sm font-semibold text-zinc-900">Ostatnie uruchomienia SCHEDULED</h2>
-        <div className="overflow-x-auto rounded-lg border border-zinc-200 bg-white">
+        <h2 className="text-sm font-semibold text-foreground">Ostatnie uruchomienia z harmonogramu</h2>
+        <Card className="overflow-x-auto p-0">
           <table className={tableClassName}>
             <thead>
               <tr>
@@ -188,8 +195,12 @@ export default async function KsefSchedulePage({ searchParams }: { searchParams:
                 recentRuns.map((run) => (
                   <tr key={run.id}>
                     <td className={tdClassName}>{run.startedAt.toLocaleString('pl-PL')}</td>
-                    <td className={tdClassName}>{run.invoiceKind}</td>
-                    <td className={tdClassName}>{run.status}</td>
+                    <td className={tdClassName}>
+                      <EnumBadge value={run.invoiceKind} labels={INVOICE_KIND} />
+                    </td>
+                    <td className={tdClassName}>
+                      <EnumBadge value={run.status} labels={IMPORT_STATUS} />
+                    </td>
                     <td className={tdClassName}>
                       {run.importedCount} / {run.duplicateCount}
                     </td>
@@ -202,7 +213,7 @@ export default async function KsefSchedulePage({ searchParams }: { searchParams:
               )}
             </tbody>
           </table>
-        </div>
+        </Card>
       </section>
     </PageShell>
   )

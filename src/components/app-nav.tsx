@@ -3,6 +3,8 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
+import { cn } from '@/lib/utils'
+
 const links = [
   { href: '/', label: 'Start' },
   { href: '/documents', label: 'Rejestr' },
@@ -25,9 +27,9 @@ export function AppNav() {
   const pathname = usePathname()
 
   return (
-    <header className="sticky top-0 z-10 border-b border-zinc-200 bg-white/95 backdrop-blur">
+    <header className="sticky top-0 z-10 border-b border-border bg-card/95 backdrop-blur">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-1 px-4 py-3">
-        <span className="mr-3 text-sm font-semibold tracking-tight text-zinc-900">Gumijagoda</span>
+        <span className="mr-3 text-sm font-semibold tracking-tight text-foreground">Gumijagoda</span>
         <nav className="flex flex-wrap gap-1">
           {links.map((link) => {
             const active = isActive(pathname, link.href)
@@ -35,11 +37,12 @@ export function AppNav() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={
+                className={cn(
+                  'rounded-md px-2.5 py-1.5 text-sm transition-colors',
                   active
-                    ? 'rounded-md bg-zinc-900 px-2.5 py-1.5 text-sm text-white'
-                    : 'rounded-md px-2.5 py-1.5 text-sm text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900'
-                }
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                )}
               >
                 {link.label}
               </Link>

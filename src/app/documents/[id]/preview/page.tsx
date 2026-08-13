@@ -5,12 +5,15 @@ import { FaInvoiceView } from '@/components/fa-invoice-view'
 import { PdfPreviewFrame } from '@/components/pdf-preview-frame'
 import {
   Alert,
+  Card,
+  EnumBadge,
   PageShell,
   buttonSecondaryClassName,
   tableClassName,
   tdClassName,
   thClassName,
 } from '@/components/ui-kit'
+import { ATTACHMENT_KIND, DOCUMENT_SOURCE, DOCUMENT_STAGE } from '@/lib/labels'
 import { DocumentError } from '@/server/documents/errors'
 import { getDocumentPreview } from '@/server/documents/get-document-preview'
 import type { ParsedFaInvoice } from '@/server/documents/parse-fa-xml'
@@ -72,9 +75,13 @@ export default async function DocumentPreviewPage({ params }: { params: RoutePar
     <PageShell
       wide
       title={`Podgląd: ${document.number}`}
-      description={`${document.stage} · ${document.source}${
-        structured.formVariant ? ` · ${structured.formVariant}` : ''
-      }`}
+      description={structured.formVariant ? `Schemat ${structured.formVariant}` : undefined}
+      meta={
+        <div className="flex flex-wrap gap-2 pt-1">
+          <EnumBadge value={document.stage} labels={DOCUMENT_STAGE} />
+          <EnumBadge value={document.source} labels={DOCUMENT_SOURCE} />
+        </div>
+      }
     >
       <div className="flex flex-wrap gap-2">
         <Link href={backHref} className={buttonSecondaryClassName}>
@@ -100,7 +107,7 @@ export default async function DocumentPreviewPage({ params }: { params: RoutePar
 
       {pdfAttachmentId && pdfMeta ? (
         <section className="space-y-2">
-          <h2 className="text-sm font-semibold text-zinc-900">PDF</h2>
+          <h2 className="text-sm font-semibold text-foreground">PDF</h2>
           <PdfPreviewFrame
             src={`/api/documents/${document.id}/attachments/${pdfAttachmentId}`}
             filename={pdfMeta.filename}
@@ -110,13 +117,13 @@ export default async function DocumentPreviewPage({ params }: { params: RoutePar
 
       <section className="space-y-2">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-sm font-semibold text-zinc-900">
+          <h2 className="text-sm font-semibold text-foreground">
             {xmlInvoice ? 'Dane z XML KSeF' : 'Dane dokumentu'}
           </h2>
           {xmlAttachmentId && xmlMeta ? (
             <a
               href={`/api/documents/${document.id}/attachments/${xmlAttachmentId}?download=1`}
-              className="text-sm text-zinc-600 underline"
+              className="text-sm text-muted-foreground underline"
             >
               Pobierz XML ({xmlMeta.filename})
             </a>
@@ -127,8 +134,8 @@ export default async function DocumentPreviewPage({ params }: { params: RoutePar
 
       {attachments.length > 0 ? (
         <section className="space-y-2">
-          <h2 className="text-sm font-semibold text-zinc-900">Załączniki</h2>
-          <div className="overflow-x-auto rounded-lg border border-zinc-200 bg-white">
+          <h2 className="text-sm font-semibold text-foreground">Załączniki</h2>
+          <Card className="overflow-x-auto p-0">
             <table className={tableClassName}>
               <thead>
                 <tr>
@@ -143,7 +150,9 @@ export default async function DocumentPreviewPage({ params }: { params: RoutePar
                 {attachments.map((attachment) => (
                   <tr key={attachment.id}>
                     <td className={tdClassName}>{attachment.filename}</td>
-                    <td className={tdClassName}>{attachment.kind}</td>
+                    <td className={tdClassName}>
+                      <EnumBadge value={attachment.kind} labels={ATTACHMENT_KIND} />
+                    </td>
                     <td className={tdClassName}>{attachment.mimeType}</td>
                     <td className={tdClassName}>{attachment.sizeBytes} B</td>
                     <td className={tdClassName}>
@@ -158,9 +167,9 @@ export default async function DocumentPreviewPage({ params }: { params: RoutePar
                     </td>
                   </tr>
                 ))}
-              </tbody>
-            </table>
-          </div>
+            </tbody>
+          </table>
+          </Card>
         </section>
       ) : null}
     </PageShell>

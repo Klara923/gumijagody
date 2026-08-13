@@ -2,12 +2,15 @@ import Link from 'next/link'
 
 import {
   Alert,
+  Card,
+  EnumBadge,
   PageShell,
   buttonClassName,
   tableClassName,
   tdClassName,
   thClassName,
 } from '@/components/ui-kit'
+import { DOCUMENT_SOURCE } from '@/lib/labels'
 import { acceptDocumentsAction } from '@/server/documents/actions'
 import { listDocuments } from '@/server/documents/list-documents'
 
@@ -39,10 +42,10 @@ export default async function BufferPage({ searchParams }: { searchParams: Searc
       {uploaded && <Alert tone="ok">Wgrano dokument do bufora.</Alert>}
 
       {items.length === 0 ? (
-        <p className="text-sm text-zinc-600">Bufor jest pusty.</p>
+        <p className="text-sm text-muted-foreground">Bufor jest pusty.</p>
       ) : (
         <form action={acceptDocumentsAction} className="space-y-4">
-          <div className="overflow-x-auto rounded-lg border border-zinc-200 bg-white">
+          <Card className="overflow-x-auto p-0">
             <table className={tableClassName}>
               <thead>
                 <tr>
@@ -71,7 +74,9 @@ export default async function BufferPage({ searchParams }: { searchParams: Searc
                     <td className={tdClassName}>
                       {document.grossAmount} {document.currency}
                     </td>
-                    <td className={tdClassName}>{document.source}</td>
+                    <td className={tdClassName}>
+                      <EnumBadge value={document.source} labels={DOCUMENT_SOURCE} />
+                    </td>
                     <td className={`${tdClassName} space-x-2 whitespace-nowrap`}>
                       <Link href={`/documents/${document.id}/preview`} className="underline">
                         Podgląd
@@ -82,9 +87,9 @@ export default async function BufferPage({ searchParams }: { searchParams: Searc
                     </td>
                   </tr>
                 ))}
-              </tbody>
-            </table>
-          </div>
+            </tbody>
+          </table>
+          </Card>
           <button type="submit" className={buttonClassName}>
             Akceptuj zaznaczone
           </button>

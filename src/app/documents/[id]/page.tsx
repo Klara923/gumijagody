@@ -1,14 +1,18 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
+import { ConfirmDelete } from '@/components/confirm-delete'
 import {
   Alert,
+  Card,
+  EnumBadge,
   Field,
   PageShell,
   buttonClassName,
   buttonSecondaryClassName,
   controlClassName,
 } from '@/components/ui-kit'
+import { DOCUMENT_SOURCE, DOCUMENT_STAGE } from '@/lib/labels'
 import { listCategoryOptions } from '@/server/categories/list-categories'
 import { listDocumentTypes } from '@/server/document-types/list-document-types'
 import {
@@ -18,6 +22,7 @@ import {
 } from '@/server/documents/actions'
 import { DocumentError } from '@/server/documents/errors'
 import { getDocumentById } from '@/server/documents/get-document'
+import { MUTABLE_DOCUMENT_SOURCES } from '@/server/documents/policy'
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>
 type RouteParams = Promise<{ id: string }>
@@ -48,16 +53,24 @@ export default async function DocumentDetailPage({
 
   const types = await listDocumentTypes()
   const categories = await listCategoryOptions()
-  const editable = document.source === 'MANUAL' || document.source === 'UPLOAD'
+  const editable = MUTABLE_DOCUMENT_SOURCES.has(document.source)
   const backHref = document.stage === 'BUFFER' ? '/buffer' : '/documents'
 
   return (
-    <PageShell title={document.number} description={`Stage: ${document.stage} · Źródło: ${document.source}`}>
+    <PageShell
+      title={document.number}
+      meta={
+        <div className="flex flex-wrap gap-2 pt-1">
+          <EnumBadge value={document.stage} labels={DOCUMENT_STAGE} />
+          <EnumBadge value={document.source} labels={DOCUMENT_SOURCE} />
+        </div>
+      }
+    >
       <p className="flex flex-wrap gap-3">
-        <Link href={backHref} className="text-sm text-zinc-600 underline">
+        <Link href={backHref} className={buttonSecondaryClassName}>
           ← Wróć
         </Link>
-        <Link href={`/documents/${document.id}/preview`} className="text-sm text-zinc-600 underline">
+        <Link href={`/documents/${document.id}/preview`} className={buttonSecondaryClassName}>
           Podgląd dokumentu
         </Link>
       </p>
@@ -66,8 +79,10 @@ export default async function DocumentDetailPage({
       {saved && <Alert tone="ok">Zapisano.</Alert>}
 
       {!editable ? (
-        <div className="space-y-2 rounded-lg border border-zinc-200 bg-white p-4 text-sm">
-          <p className="text-zinc-600">Dokument z KSeF — dane faktury tylko do odczytu; kategorię możesz zmienić.</p>
+        <Card className="space-y-2 text-sm">
+          <p className="text-muted-foreground">
+            Dokument z KSeF — dane faktury tylko do odczytu; kategorię możesz zmienić.
+          </p>
           <p>Typ: {document.type.name}</p>
           <p>
             Kontrahent: {document.contractor.name}
@@ -94,10 +109,11 @@ export default async function DocumentDetailPage({
               Zapisz kategorię
             </button>
           </form>
-        </div>
+        </Card>
       ) : (
         <>
-          <form action={updateDocumentAction} className="grid gap-3 rounded-lg border border-zinc-200 bg-white p-4">
+          <Card>
+          <form action={updateDocumentAction} className="grid gap-3">
             <input type="hidden" name="id" value={document.id} />
             <input type="hidden" name="contractorId" value={document.contractor.id} />
             <Field label="Numer">
@@ -112,7 +128,7 @@ export default async function DocumentDetailPage({
                 ))}
               </select>
             </Field>
-            <p className="text-sm text-zinc-600">
+            <p className="text-sm text-muted-foreground">
               Kontrahent: {document.contractor.name}
               {document.contractor.nip ? ` (${document.contractor.nip})` : ''}
             </p>
@@ -164,13 +180,15 @@ export default async function DocumentDetailPage({
               Zapisz zmiany
             </button>
           </form>
+          </Card>
 
-          <form action={deleteDocumentAction}>
-            <input type="hidden" name="id" value={document.id} />
-            <button type="submit" className={buttonSecondaryClassName}>
-              Usuń dokument
-            </button>
-          </form>
+          <ConfirmDelete
+            action={deleteDocumentAction}
+            fields={{ id: document.id }}
+            label="Usuń dokument"
+            title={`Usunąć dokument ${document.number}?`}
+            description="Zniknie z bufora albo rejestru. Tej operacji nie da się cofnąć."
+          />
         </>
       )}
     </PageShell>

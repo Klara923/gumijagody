@@ -1,14 +1,18 @@
+import { ConfirmDelete } from '@/components/confirm-delete'
 import {
   Alert,
+  Card,
+  CardTitle,
+  EnumBadge,
   Field,
   PageShell,
   buttonClassName,
-  buttonSecondaryClassName,
   controlClassName,
   tableClassName,
   tdClassName,
   thClassName,
 } from '@/components/ui-kit'
+import { DOCUMENT_DIRECTION } from '@/lib/labels'
 import {
   createDocumentTypeAction,
   deleteDocumentTypeAction,
@@ -41,8 +45,8 @@ export default async function DocumentTypesPage({ searchParams }: { searchParams
       {saved && <Alert tone="ok">Zapisano typ.</Alert>}
       {deleted && <Alert tone="ok">Usunięto typ.</Alert>}
 
-      <section className="rounded-lg border border-zinc-200 bg-white p-4">
-        <h2 className="mb-3 text-sm font-semibold text-zinc-900">Dodaj własny typ</h2>
+      <Card>
+        <CardTitle>Dodaj własny typ</CardTitle>
         <form action={createDocumentTypeAction} className="grid max-w-md gap-3">
           <Field label="Nazwa">
             <input name="name" required placeholder="Nota obciążeniowa" className={controlClassName} />
@@ -57,9 +61,9 @@ export default async function DocumentTypesPage({ searchParams }: { searchParams
             Dodaj
           </button>
         </form>
-      </section>
+      </Card>
 
-      <section className="overflow-x-auto rounded-lg border border-zinc-200 bg-white">
+      <Card className="overflow-x-auto p-0">
         <table className={tableClassName}>
           <thead>
             <tr>
@@ -94,27 +98,31 @@ export default async function DocumentTypesPage({ searchParams }: { searchParams
                   )}
                 </td>
                 <td className={tdClassName}>
-                  {type.direction === 'RECEIVABLE' ? 'należność' : 'zobowiązanie'}
-                  {type.isSystem ? ' · systemowy' : ''}
+                  <span className="inline-flex flex-wrap items-center gap-2">
+                    <EnumBadge value={type.direction} labels={DOCUMENT_DIRECTION} />
+                    {type.isSystem ? (
+                      <span className="text-xs text-muted-foreground">systemowy</span>
+                    ) : null}
+                  </span>
                 </td>
                 <td className={tdClassName}>{type.documentsCount}</td>
                 <td className={tdClassName}>
                   {type.isSystem ? (
-                    <span className="text-xs text-zinc-500">Nie usuwa się</span>
+                    <span className="text-xs text-muted-foreground">Nie usuwa się</span>
                   ) : (
-                    <form action={deleteDocumentTypeAction}>
-                      <input type="hidden" name="id" value={type.id} />
-                      <button type="submit" className={buttonSecondaryClassName}>
-                        Usuń
-                      </button>
-                    </form>
+                    <ConfirmDelete
+                      action={deleteDocumentTypeAction}
+                      fields={{ id: type.id }}
+                      title={`Usunąć typ „${type.name}”?`}
+                      description="Typu używanego przez dokumenty nie da się usunąć."
+                    />
                   )}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-      </section>
+      </Card>
     </PageShell>
   )
 }

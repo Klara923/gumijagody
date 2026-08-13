@@ -1,5 +1,8 @@
+import { ConfirmDelete } from '@/components/confirm-delete'
 import {
   Alert,
+  Card,
+  CardTitle,
   Field,
   PageShell,
   buttonClassName,
@@ -26,11 +29,11 @@ function first(value: string | string[] | undefined) {
 
 function CategoryBranch({ nodes, depth = 0 }: { nodes: CategoryNode[]; depth?: number }) {
   return (
-    <ul className={depth === 0 ? 'space-y-3' : 'mt-2 space-y-2 border-l border-zinc-200 pl-4'}>
+    <ul className={depth === 0 ? 'space-y-3' : 'mt-2 space-y-2 border-l border-border pl-4'}>
       {nodes.map((node) => (
-        <li key={node.id} className="rounded-md bg-zinc-50/80 p-3">
+        <li key={node.id} className="rounded-md bg-muted/60 p-3">
           <div className="flex flex-wrap items-center gap-2">
-            <strong className="text-sm text-zinc-900">{node.name}</strong>
+            <strong className="text-sm text-foreground">{node.name}</strong>
             <form action={updateCategoryAction} className="flex flex-wrap items-center gap-2">
               <input type="hidden" name="id" value={node.id} />
               <input name="name" defaultValue={node.name} required className={controlClassName} />
@@ -38,12 +41,12 @@ function CategoryBranch({ nodes, depth = 0 }: { nodes: CategoryNode[]; depth?: n
                 Zmień nazwę
               </button>
             </form>
-            <form action={deleteCategoryAction}>
-              <input type="hidden" name="id" value={node.id} />
-              <button type="submit" className={buttonSecondaryClassName}>
-                Usuń
-              </button>
-            </form>
+            <ConfirmDelete
+              action={deleteCategoryAction}
+              fields={{ id: node.id }}
+              title={`Usunąć kategorię „${node.name}”?`}
+              description="Nie usuniesz kategorii, która ma podkategorie albo przypisane dokumenty."
+            />
           </div>
           {node.children.length > 0 && <CategoryBranch nodes={node.children} depth={depth + 1} />}
         </li>
@@ -78,8 +81,8 @@ export default async function CategoriesPage({ searchParams }: { searchParams: S
       {ruleSaved && <Alert tone="ok">Zapisano regułę.</Alert>}
       {ruleDeleted && <Alert tone="ok">Usunięto regułę.</Alert>}
 
-      <section className="rounded-lg border border-zinc-200 bg-white p-4">
-        <h2 className="mb-3 text-sm font-semibold text-zinc-900">Dodaj kategorię</h2>
+      <Card>
+        <CardTitle>Dodaj kategorię</CardTitle>
         <form action={createCategoryAction} className="grid max-w-md gap-3">
           <Field label="Nazwa">
             <input name="name" required className={controlClassName} />
@@ -98,17 +101,17 @@ export default async function CategoriesPage({ searchParams }: { searchParams: S
             Dodaj
           </button>
         </form>
-      </section>
+      </Card>
 
-      <section className="rounded-lg border border-zinc-200 bg-white p-4">
-        <h2 className="mb-1 text-sm font-semibold text-zinc-900">Reguły ze słów kluczowych</h2>
-        <p className="mb-3 text-sm text-zinc-600">
+      <Card>
+        <CardTitle>Reguły ze słów kluczowych</CardTitle>
+        <p className="mb-3 text-sm text-muted-foreground">
           Jeśli kontrahent nie ma domyślnej kategorii, dokument dostanie kategorię z pierwszej
           pasującej reguły. Szukamy słowa w nazwie kontrahenta, NIP, numerze dokumentu i pozycjach
           faktury XML. Mniejsza kolejność wygrywa; przy remisie dłuższe słowo.
         </p>
         {options.length === 0 ? (
-          <p className="text-sm text-zinc-600">Najpierw dodaj kategorię powyżej.</p>
+          <p className="text-sm text-muted-foreground">Najpierw dodaj kategorię powyżej.</p>
         ) : (
           <form action={createKeywordRuleAction} className="grid max-w-md gap-3">
             <Field label="Słowo kluczowe">
@@ -151,7 +154,7 @@ export default async function CategoriesPage({ searchParams }: { searchParams: S
             {keywordRules.map((rule) => (
               <li
                 key={rule.id}
-                className="flex flex-col gap-2 rounded-md bg-zinc-50/80 p-3 sm:flex-row sm:flex-wrap sm:items-center"
+                className="flex flex-col gap-2 rounded-md bg-muted/60 p-3 sm:flex-row sm:flex-wrap sm:items-center"
               >
                 <form action={updateKeywordRuleAction} className="flex flex-wrap items-center gap-2">
                   <input type="hidden" name="id" value={rule.id} />
@@ -185,28 +188,28 @@ export default async function CategoriesPage({ searchParams }: { searchParams: S
                     Zapisz
                   </button>
                 </form>
-                <form action={deleteKeywordRuleAction}>
-                  <input type="hidden" name="id" value={rule.id} />
-                  <button type="submit" className={buttonSecondaryClassName}>
-                    Usuń
-                  </button>
-                </form>
+                <ConfirmDelete
+                  action={deleteKeywordRuleAction}
+                  fields={{ id: rule.id }}
+                  title={`Usunąć regułę „${rule.keyword}”?`}
+                  description="Nowe dokumenty przestaną dostawać tę kategorię po tym słowie."
+                />
               </li>
             ))}
           </ul>
         ) : options.length > 0 ? (
-          <p className="mt-3 text-sm text-zinc-600">Brak reguł słów kluczowych.</p>
+          <p className="mt-3 text-sm text-muted-foreground">Brak reguł słów kluczowych.</p>
         ) : null}
-      </section>
+      </Card>
 
-      <section className="rounded-lg border border-zinc-200 bg-white p-4">
-        <h2 className="mb-3 text-sm font-semibold text-zinc-900">Drzewo</h2>
+      <Card>
+        <CardTitle>Drzewo</CardTitle>
         {tree.length === 0 ? (
-          <p className="text-sm text-zinc-600">Brak kategorii.</p>
+          <p className="text-sm text-muted-foreground">Brak kategorii.</p>
         ) : (
           <CategoryBranch nodes={tree} />
         )}
-      </section>
+      </Card>
     </PageShell>
   )
 }
