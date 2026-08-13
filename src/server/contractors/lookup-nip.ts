@@ -1,7 +1,8 @@
 import { isValidNip } from '@/server/validation'
 
-const LOOKUP_TIMEOUT_MS = 10_000
-const API_BASE = 'https://wl-api.mf.gov.pl'
+import { ContractorLookupError, fetchWlApi, todayInWarsaw } from './wl-api'
+
+export { ContractorLookupError } from './wl-api'
 
 export type ContractorLookupResult = {
   name: string
@@ -11,20 +12,6 @@ export type ContractorLookupResult = {
   city: string | null
   bankAccount: string | null
   statusVat: string | null
-}
-
-export class ContractorLookupError extends Error {
-  readonly status: number
-
-  constructor(message: string, status: number) {
-    super(message)
-    this.name = 'ContractorLookupError'
-    this.status = status
-  }
-}
-
-function todayInWarsaw() {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Warsaw' }).format(new Date())
 }
 
 function parsePolishAddress(raw: string | null | undefined) {
@@ -61,31 +48,9 @@ export async function lookupContractorByNip(nipRaw: string): Promise<ContractorL
   }
 
   const date = todayInWarsaw()
-  const url = `${API_BASE}/api/search/nip/${nip}?date=${date}`
-
-  let response: Response
-  try {
-    response = await fetch(url, {
-      headers: { Accept: 'application/json' },
-      signal: AbortSignal.timeout(LOOKUP_TIMEOUT_MS),
-      cache: 'no-store',
-    })
-  } catch {
-    throw new ContractorLookupError('Nie udało się połączyć z wykazem podatników VAT', 503)
+  const payload = (await fetchWlApi(`/api/search/nip/${nip}?date=${date}`)) as {
+    result?: { subject?: WlSubject | null }
   }
-
-  if (response.status === 429) {
-    throw new ContractorLookupError(
-      'Wykaz podatników odrzucił zapytanie (limit 100 wyszukań dziennie). Spróbuj jutro.',
-      429,
-    )
-  }
-
-  if (!response.ok) {
-    throw new ContractorLookupError('Wykaz podatników VAT nie przyjął zapytania', 502)
-  }
-
-  const payload = (await response.json()) as { result?: { subject?: WlSubject | null } }
   const subject = payload.result?.subject
   if (!subject) {
     throw new ContractorLookupError('Ten NIP nie figuruje w wykazie podatników VAT', 404)

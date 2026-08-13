@@ -27,7 +27,10 @@ export function ContractorLookupFields({
   const [bankAccount, setBankAccount] = useState('')
   const [status, setStatus] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [whitelist, setWhitelist] = useState<string | null>(null)
+  const [whitelistOk, setWhitelistOk] = useState<boolean | null>(null)
   const [pending, setPending] = useState(false)
+  const [checking, setChecking] = useState(false)
 
   async function lookup() {
     setError(null)
@@ -46,6 +49,8 @@ export function ContractorLookupFields({
       setPostalCode(payload.postalCode ?? '')
       setCity(payload.city ?? '')
       setBankAccount(payload.bankAccount ?? '')
+      setWhitelist(null)
+      setWhitelistOk(null)
       setStatus(
         payload.statusVat
           ? `Uzupełniono z wykazu VAT (${payload.statusVat}).`
@@ -55,6 +60,37 @@ export function ContractorLookupFields({
       setError('Nie udało się połączyć z serwerem')
     } finally {
       setPending(false)
+    }
+  }
+
+  async function checkWhitelist() {
+    setWhitelist(null)
+    setWhitelistOk(null)
+    setChecking(true)
+    try {
+      const params = new URLSearchParams({ nip, account: bankAccount })
+      const response = await fetch(`/api/contractors/whitelist?${params.toString()}`)
+      const payload = (await response.json()) as {
+        matched?: boolean
+        requestId?: string | null
+        error?: string
+      }
+      if (!response.ok) {
+        setWhitelistOk(false)
+        setWhitelist(payload.error ?? 'Nie udało się sprawdzić białej listy')
+        return
+      }
+      setWhitelistOk(payload.matched === true)
+      setWhitelist(
+        payload.matched
+          ? `Rachunek jest na białej liście VAT dla tego NIP${payload.requestId ? ` (id ${payload.requestId})` : ''}.`
+          : `Tego rachunku nie ma na białej liście VAT dla tego NIP${payload.requestId ? ` (id ${payload.requestId})` : ''}.`,
+      )
+    } catch {
+      setWhitelistOk(false)
+      setWhitelist('Nie udało się połączyć z serwerem')
+    } finally {
+      setChecking(false)
     }
   }
 
@@ -118,12 +154,29 @@ export function ContractorLookupFields({
         />
       </Field>
       <Field label="Rachunek kontrahenta (opcjonalnie)">
-        <input
-          name="contractorBankAccount"
-          value={bankAccount}
-          onChange={(event) => setBankAccount(event.target.value)}
-          className={controlClassName}
-        />
+        <div className="flex flex-wrap gap-2">
+          <input
+            name="contractorBankAccount"
+            value={bankAccount}
+            onChange={(event) => {
+              setBankAccount(event.target.value)
+              setWhitelist(null)
+              setWhitelistOk(null)
+            }}
+            className={controlClassName}
+          />
+          <button
+            type="button"
+            onClick={() => void checkWhitelist()}
+            disabled={checking}
+            className={buttonSecondaryClassName}
+          >
+            {checking ? 'Sprawdzam…' : 'Sprawdź na białej liście'}
+          </button>
+        </div>
+        {whitelist ? (
+          <p className={whitelistOk ? 'text-sm text-emerald-800' : 'text-sm text-red-700'}>{whitelist}</p>
+        ) : null}
       </Field>
     </div>
   )
