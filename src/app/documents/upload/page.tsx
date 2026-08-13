@@ -1,3 +1,4 @@
+import { ContractorLookupFields } from '@/components/contractor-lookup-fields'
 import {
   Alert,
   Field,
@@ -56,12 +57,7 @@ export default async function UploadDocumentPage({
               ))}
             </select>
           </Field>
-          <Field label="Kontrahent — nazwa">
-            <input name="contractorName" className={controlClassName} />
-          </Field>
-          <Field label="Kontrahent — NIP">
-            <input name="contractorNip" className={controlClassName} />
-          </Field>
+          <ContractorLookupFields />
           <Field label="Data wystawienia">
             <input type="date" name="issueDate" className={controlClassName} />
           </Field>

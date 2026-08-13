@@ -1,3 +1,4 @@
+import { ContractorLookupFields } from '@/components/contractor-lookup-fields'
 import {
   Alert,
   Field,
@@ -39,12 +40,7 @@ export default async function NewDocumentPage({ searchParams }: { searchParams: 
             ))}
           </select>
         </Field>
-        <Field label="Kontrahent — nazwa">
-          <input name="contractorName" required className={controlClassName} />
-        </Field>
-        <Field label="Kontrahent — NIP (opcjonalnie)">
-          <input name="contractorNip" className={controlClassName} />
-        </Field>
+        <ContractorLookupFields requiredName />
         <Field label="Kategoria (opcjonalnie)">
           <select name="categoryId" defaultValue="" className={controlClassName}>
             <option value="">— brak / wg reguły kontrahenta —</option>

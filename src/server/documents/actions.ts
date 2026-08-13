@@ -31,6 +31,17 @@ function optionalFormString(formData: FormData, key: string) {
   return value === '' ? undefined : value
 }
 
+function contractorFromForm(formData: FormData) {
+  return {
+    name: formString(formData, 'contractorName'),
+    nip: optionalFormString(formData, 'contractorNip'),
+    street: optionalFormString(formData, 'contractorStreet'),
+    postalCode: optionalFormString(formData, 'contractorPostalCode'),
+    city: optionalFormString(formData, 'contractorCity'),
+    bankAccount: optionalFormString(formData, 'contractorBankAccount'),
+  }
+}
+
 function redirectWithError(path: string, error: unknown): never {
   if (isRedirectError(error)) throw error
 
@@ -51,10 +62,7 @@ export async function createDocumentAction(formData: FormData) {
   const raw = {
     number: formString(formData, 'number'),
     typeId: formString(formData, 'typeId'),
-    contractor: {
-      name: formString(formData, 'contractorName'),
-      nip: optionalFormString(formData, 'contractorNip'),
-    },
+    contractor: contractorFromForm(formData),
     issueDate: formString(formData, 'issueDate'),
     dueDate: optionalFormString(formData, 'dueDate'),
     netAmount: formString(formData, 'netAmount'),
@@ -179,10 +187,7 @@ export async function uploadDocumentAction(formData: FormData) {
   const metadata = {
     number: formString(formData, 'number'),
     typeId: formString(formData, 'typeId'),
-    contractor: {
-      name: formString(formData, 'contractorName'),
-      nip: optionalFormString(formData, 'contractorNip'),
-    },
+    contractor: contractorFromForm(formData),
     issueDate: formString(formData, 'issueDate'),
     dueDate: optionalFormString(formData, 'dueDate'),
     netAmount: formString(formData, 'netAmount'),
