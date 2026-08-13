@@ -5,14 +5,19 @@ import { isRedirectError } from 'next/dist/client/components/redirect-error'
 import { redirect } from 'next/navigation'
 
 import { createCategory } from '@/server/categories/create-category'
+import { createKeywordRule } from '@/server/categories/create-keyword-rule'
 import { deleteCategory } from '@/server/categories/delete-category'
+import { deleteKeywordRule } from '@/server/categories/delete-keyword-rule'
 import { CategoryError } from '@/server/categories/errors'
 import {
   createCategoryBodySchema,
+  createKeywordRuleBodySchema,
   updateCategoryBodySchema,
   updateContractorDefaultCategoryBodySchema,
+  updateKeywordRuleBodySchema,
 } from '@/server/categories/schemas'
 import { updateCategory } from '@/server/categories/update-category'
+import { updateKeywordRule } from '@/server/categories/update-keyword-rule'
 import { updateContractorDefaultCategory } from '@/server/contractors/update-default-category'
 
 function formString(formData: FormData, key: string) {
@@ -96,6 +101,63 @@ export async function deleteCategoryAction(formData: FormData) {
     revalidatePath('/contractors')
     revalidatePath('/documents')
     redirect('/categories?deleted=1')
+  } catch (error) {
+    redirectWithError('/categories', error)
+  }
+}
+
+export async function createKeywordRuleAction(formData: FormData) {
+  const parsed = createKeywordRuleBodySchema.safeParse({
+    keyword: formString(formData, 'keyword'),
+    categoryId: formString(formData, 'categoryId'),
+    priority: optionalFormString(formData, 'priority') ?? 100,
+  })
+  if (!parsed.success) {
+    redirectWithError('/categories', parsed.error.issues[0]?.message ?? 'Nieprawidłowe dane')
+  }
+
+  try {
+    await createKeywordRule(parsed.data)
+    revalidatePath('/categories')
+    revalidatePath('/documents')
+    revalidatePath('/buffer')
+    redirect('/categories?ruleCreated=1')
+  } catch (error) {
+    redirectWithError('/categories', error)
+  }
+}
+
+export async function updateKeywordRuleAction(formData: FormData) {
+  const id = formString(formData, 'id')
+  const parsed = updateKeywordRuleBodySchema.safeParse({
+    keyword: optionalFormString(formData, 'keyword'),
+    categoryId: optionalFormString(formData, 'categoryId'),
+    priority: optionalFormString(formData, 'priority'),
+  })
+  if (!parsed.success) {
+    redirectWithError('/categories', parsed.error.issues[0]?.message ?? 'Nieprawidłowe dane')
+  }
+
+  try {
+    await updateKeywordRule(id, parsed.data)
+    revalidatePath('/categories')
+    revalidatePath('/documents')
+    revalidatePath('/buffer')
+    redirect('/categories?ruleSaved=1')
+  } catch (error) {
+    redirectWithError('/categories', error)
+  }
+}
+
+export async function deleteKeywordRuleAction(formData: FormData) {
+  const id = formString(formData, 'id')
+
+  try {
+    await deleteKeywordRule(id)
+    revalidatePath('/categories')
+    revalidatePath('/documents')
+    revalidatePath('/buffer')
+    redirect('/categories?ruleDeleted=1')
   } catch (error) {
     redirectWithError('/categories', error)
   }

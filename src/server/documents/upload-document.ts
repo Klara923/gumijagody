@@ -1,4 +1,5 @@
 import type { AttachmentKind } from '@/generated/prisma/client'
+import { resolveDocumentCategoryId } from '@/server/categories/resolve-document-category'
 import { getPrisma } from '@/server/infrastructure/db/prisma'
 
 import { resolveContractor } from './contractors'
@@ -86,16 +87,13 @@ async function createUploadDocument(input: {
         throw new DocumentError(`Typ dokumentu o id ${input.typeId} nie istnieje`, 400)
       }
 
-      if (input.categoryId) {
-        const category = await tx.category.findUnique({ where: { id: input.categoryId } })
-        if (!category) {
-          throw new DocumentError(`Kategoria o id ${input.categoryId} nie istnieje`, 400)
-        }
-      }
-
       const contractorId = await resolveContractor(tx, input.contractor)
       const contractor = await tx.contractor.findUniqueOrThrow({ where: { id: contractorId } })
-      const categoryId = input.categoryId ?? contractor.defaultCategoryId ?? null
+      const categoryId = await resolveDocumentCategoryId(tx, {
+        explicitCategoryId: input.categoryId,
+        contractorDefaultCategoryId: contractor.defaultCategoryId,
+        texts: [input.number, contractor.name, contractor.nip],
+      })
 
       const document = await tx.document.create({
         data: {

@@ -43,7 +43,7 @@ export default async function NewDocumentPage({ searchParams }: { searchParams: 
         <ContractorLookupFields requiredName />
         <Field label="Kategoria (opcjonalnie)">
           <select name="categoryId" defaultValue="" className={controlClassName}>
-            <option value="">— brak / wg reguły kontrahenta —</option>
+            <option value="">— brak / wg reguły kontrahenta lub słowa kluczowego —</option>
             {categories.map((category) => (
               <option key={category.id} value={category.id}>
                 {category.label}

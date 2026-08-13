@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto'
 
 import type { DocumentDirection, DocumentSource } from '@/generated/prisma/client'
+import { resolveDocumentCategoryId } from '@/server/categories/resolve-document-category'
 import { getEnv } from '@/server/env'
 import { getPrisma } from '@/server/infrastructure/db/prisma'
 import {
@@ -143,6 +144,15 @@ export async function ingestFaXmlDocument(input: IngestFaXmlInput) {
     const document = await prisma.$transaction(async (tx) => {
       const contractorId = await resolveContractor(tx, contractorFromParty(counterparty))
       const contractor = await tx.contractor.findUniqueOrThrow({ where: { id: contractorId } })
+      const categoryId = await resolveDocumentCategoryId(tx, {
+        contractorDefaultCategoryId: contractor.defaultCategoryId,
+        texts: [
+          parsed.number,
+          contractor.name,
+          contractor.nip,
+          ...parsed.lines.map((line) => line.name),
+        ],
+      })
 
       const created = await tx.document.create({
         data: {
@@ -156,7 +166,7 @@ export async function ingestFaXmlDocument(input: IngestFaXmlInput) {
           grossAmount: parsed.grossAmount,
           currency: parsed.currency,
           paymentAccount: optionalValidAccount(parsed.paymentAccount) ?? null,
-          categoryId: contractor.defaultCategoryId ?? null,
+          categoryId,
           source: input.source,
           ksefNumber: input.ksefNumber ?? null,
           stage: 'BUFFER',

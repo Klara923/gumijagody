@@ -68,13 +68,31 @@ model Category {
   children Category[] @relation("CategoryTree")
 
   documents             Document[]
-  defaultForContractors Contractor[] @relation("ContractorDefaultCategory")
+  defaultForContractors Contractor[]        @relation("ContractorDefaultCategory")
+  keywordRules          CategoryKeywordRule[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@unique([parentId, name])
   @@index([parentId])
+}
+
+model CategoryKeywordRule {
+  id String @id @default(cuid())
+
+  keyword String @unique
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  priority Int @default(100)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([categoryId])
+  @@index([priority])
 }
 
 model Contractor {

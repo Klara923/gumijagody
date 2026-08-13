@@ -25,3 +25,37 @@ export const updateContractorDefaultCategoryBodySchema = z.object({
 export type UpdateContractorDefaultCategoryInput = z.infer<
   typeof updateContractorDefaultCategoryBodySchema
 >
+
+const keywordSchema = z
+  .string()
+  .trim()
+  .min(2, 'Słowo kluczowe musi mieć co najmniej 2 znaki')
+  .max(80, 'Słowo kluczowe jest za długie')
+
+const prioritySchema = z.coerce
+  .number()
+  .int('Kolejność musi być liczbą całkowitą')
+  .min(0, 'Kolejność nie może być ujemna')
+  .max(9999, 'Kolejność jest za duża')
+
+export const createKeywordRuleBodySchema = z.object({
+  keyword: keywordSchema,
+  categoryId: z.string().trim().min(1, 'Wybierz kategorię'),
+  priority: prioritySchema.optional(),
+})
+
+export type CreateKeywordRuleInput = z.infer<typeof createKeywordRuleBodySchema>
+
+export const updateKeywordRuleBodySchema = z
+  .object({
+    keyword: keywordSchema.optional(),
+    categoryId: z.string().trim().min(1, 'Wybierz kategorię').optional(),
+    priority: prioritySchema.optional(),
+  })
+  .refine(
+    (body) =>
+      body.keyword !== undefined || body.categoryId !== undefined || body.priority !== undefined,
+    { message: 'Podaj słowo kluczowe, kategorię lub kolejność' },
+  )
+
+export type UpdateKeywordRuleInput = z.infer<typeof updateKeywordRuleBodySchema>

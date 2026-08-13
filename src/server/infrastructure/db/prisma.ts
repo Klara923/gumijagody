@@ -37,7 +37,9 @@ export function getPrismaConnectUrl(connectionString = getEnv().DATABASE_URL): s
 }
 
 export function getPrisma(): PrismaClient {
-  if (globalForPrisma.prisma) return globalForPrisma.prisma
+  const cached = globalForPrisma.prisma
+  // After `prisma generate`, Turbopack keeps the previous PrismaClient on globalThis.
+  if (cached?.categoryKeywordRule) return cached
 
   const connectionString = getPrismaConnectUrl()
   const adapter = connectionString.includes('.neon.tech')

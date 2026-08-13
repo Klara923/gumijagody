@@ -28,7 +28,7 @@ export default async function ContractorsPage({ searchParams }: { searchParams: 
     <PageShell
       wide
       title="Kontrahenci — reguła kategorii"
-      description="Ustaw domyślną kategorię. Przy uploadzie / imporcie KSeF dokument dostanie ją automatycznie."
+      description="Ustaw domyślną kategorię. Ma pierwszeństwo przed słowami kluczowymi (Kategorie). Przy uploadzie / imporcie KSeF dokument dostanie ją automatycznie."
     >
       {error && <Alert>{error}</Alert>}
       {saved && <Alert tone="ok">Zapisano regułę.</Alert>}

@@ -43,10 +43,25 @@ async function main() {
 
   const materials = await ensureCategory('Materiały')
   const services = await ensureCategory('Usługi')
-  await ensureCategory('Opakowania', materials.id)
-  await ensureCategory('Transport', services.id)
+  const packaging = await ensureCategory('Opakowania', materials.id)
+  const transport = await ensureCategory('Transport', services.id)
 
   console.log('Seed: przykładowe drzewo kategorii (Materiały/Opakowania, Usługi/Transport)')
+
+  const keywordRules = [
+    { keyword: 'transport', categoryId: transport.id, priority: 50 },
+    { keyword: 'opakowan', categoryId: packaging.id, priority: 50 },
+  ]
+
+  for (const rule of keywordRules) {
+    await prisma.categoryKeywordRule.upsert({
+      where: { keyword: rule.keyword },
+      create: rule,
+      update: { categoryId: rule.categoryId, priority: rule.priority },
+    })
+  }
+
+  console.log('Seed: przykładowe reguły słów kluczowych (transport, opakowan)')
 }
 
 main()

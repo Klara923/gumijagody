@@ -1,3 +1,4 @@
+import { resolveDocumentCategoryId } from '@/server/categories/resolve-document-category'
 import { getPrisma } from '@/server/infrastructure/db/prisma'
 
 import { resolveContractor, requireContractorId } from './contractors'
@@ -15,13 +16,6 @@ export async function createDocument(input: CreateDocumentInput) {
         throw new DocumentError(`Typ dokumentu o id ${input.typeId} nie istnieje`, 400)
       }
 
-      if (input.categoryId) {
-        const category = await tx.category.findUnique({ where: { id: input.categoryId } })
-        if (!category) {
-          throw new DocumentError(`Kategoria o id ${input.categoryId} nie istnieje`, 400)
-        }
-      }
-
       let contractorId: string
       if (input.contractor) {
         contractorId = await resolveContractor(tx, input.contractor)
@@ -32,7 +26,11 @@ export async function createDocument(input: CreateDocumentInput) {
       }
 
       const contractor = await tx.contractor.findUniqueOrThrow({ where: { id: contractorId } })
-      const categoryId = input.categoryId ?? contractor.defaultCategoryId ?? null
+      const categoryId = await resolveDocumentCategoryId(tx, {
+        explicitCategoryId: input.categoryId,
+        contractorDefaultCategoryId: contractor.defaultCategoryId,
+        texts: [input.number, contractor.name, contractor.nip],
+      })
 
       const document = await tx.document.create({
         data: {
