@@ -19,6 +19,16 @@ const eslintConfig = defineConfig([
       ],
     },
   },
+  {
+    files: ['**/*.test.ts'],
+    languageOptions: {
+      globals: {
+        describe: 'readonly',
+        it: 'readonly',
+        expect: 'readonly',
+      },
+    },
+  },
   globalIgnores([
     '.next/**',
     'out/**',
