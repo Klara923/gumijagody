@@ -1,20 +1,19 @@
 import Link from 'next/link'
 
+import { RegisterColumnsTable } from '@/components/register-columns-table'
 import {
   Alert,
   Field,
   PageShell,
   buttonClassName,
   controlClassName,
-  tableClassName,
-  tdClassName,
-  thClassName,
 } from '@/components/ui-kit'
 import { listCategoryOptions } from '@/server/categories/list-categories'
 import { listContractors } from '@/server/contractors/list-contractors'
 import { listDocumentTypes } from '@/server/document-types/list-document-types'
 import { listDocuments } from '@/server/documents/list-documents'
 import { listDocumentsQuerySchema } from '@/server/documents/schemas'
+import { getRegisterVisibleColumns } from '@/server/table-preferences/get-table-preference'
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>
 
@@ -41,12 +40,13 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Se
   const categories = await listCategoryOptions()
   const contractors = await listContractors()
   const items = parsed.success ? await listDocuments(parsed.data) : []
+  const visibleColumns = await getRegisterVisibleColumns()
 
   return (
     <PageShell
       wide
       title="Rejestr dokumentów"
-      description="Zaakceptowane dokumenty. Filtruj i otwieraj szczegóły."
+      description="Zaakceptowane dokumenty. Filtruj, pokaż lub ukryj kolumny i otwieraj szczegóły."
     >
       <p>
         <Link href="/documents/new" className={buttonClassName}>
@@ -151,53 +151,7 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Se
         </button>
       </form>
 
-      <div className="overflow-x-auto rounded-lg border border-zinc-200 bg-white">
-        <table className={tableClassName}>
-          <thead>
-            <tr>
-              <th className={thClassName}>Numer</th>
-              <th className={thClassName}>Typ</th>
-              <th className={thClassName}>Kontrahent</th>
-              <th className={thClassName}>Kategoria</th>
-              <th className={thClassName}>Data</th>
-              <th className={thClassName}>Brutto</th>
-              <th className={thClassName}>Źródło</th>
-              <th className={thClassName}></th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.length === 0 ? (
-              <tr>
-                <td className={tdClassName} colSpan={8}>
-                  Brak dokumentów w rejestrze
-                </td>
-              </tr>
-            ) : (
-              items.map((document) => (
-                <tr key={document.id}>
-                  <td className={tdClassName}>{document.number}</td>
-                  <td className={tdClassName}>{document.type.name}</td>
-                  <td className={tdClassName}>{document.contractor.name}</td>
-                  <td className={tdClassName}>{document.category?.name ?? '—'}</td>
-                  <td className={tdClassName}>{document.issueDate}</td>
-                  <td className={tdClassName}>
-                    {document.grossAmount} {document.currency}
-                  </td>
-                  <td className={tdClassName}>{document.source}</td>
-                  <td className={`${tdClassName} space-x-2 whitespace-nowrap`}>
-                    <Link href={`/documents/${document.id}/preview`} className="underline">
-                      Podgląd
-                    </Link>
-                    <Link href={`/documents/${document.id}`} className="underline">
-                      Szczegóły
-                    </Link>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+      <RegisterColumnsTable documents={items} initialVisibleColumns={visibleColumns} />
     </PageShell>
   )
 }
