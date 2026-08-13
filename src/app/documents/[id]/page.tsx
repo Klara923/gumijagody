@@ -10,6 +10,7 @@ import {
   controlClassName,
 } from '@/components/ui-kit'
 import { listCategoryOptions } from '@/server/categories/list-categories'
+import { listDocumentTypes } from '@/server/document-types/list-document-types'
 import {
   assignDocumentCategoryAction,
   deleteDocumentAction,
@@ -17,7 +18,6 @@ import {
 } from '@/server/documents/actions'
 import { DocumentError } from '@/server/documents/errors'
 import { getDocumentById } from '@/server/documents/get-document'
-import { getPrisma } from '@/server/infrastructure/db/prisma'
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>
 type RouteParams = Promise<{ id: string }>
@@ -46,7 +46,7 @@ export default async function DocumentDetailPage({
     throw err
   }
 
-  const types = await getPrisma().documentType.findMany({ orderBy: { name: 'asc' } })
+  const types = await listDocumentTypes()
   const categories = await listCategoryOptions()
   const editable = document.source === 'MANUAL' || document.source === 'UPLOAD'
   const backHref = document.stage === 'BUFFER' ? '/buffer' : '/documents'
@@ -107,7 +107,7 @@ export default async function DocumentDetailPage({
               <select name="typeId" defaultValue={document.type.id} required className={controlClassName}>
                 {types.map((type) => (
                   <option key={type.id} value={type.id}>
-                    {type.name}
+                    {type.label}
                   </option>
                 ))}
               </select>

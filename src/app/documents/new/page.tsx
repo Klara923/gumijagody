@@ -5,9 +5,9 @@ import {
   buttonClassName,
   controlClassName,
 } from '@/components/ui-kit'
-import { createDocumentAction } from '@/server/documents/actions'
 import { listCategoryOptions } from '@/server/categories/list-categories'
-import { getPrisma } from '@/server/infrastructure/db/prisma'
+import { listDocumentTypes } from '@/server/document-types/list-document-types'
+import { createDocumentAction } from '@/server/documents/actions'
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>
 
@@ -18,7 +18,7 @@ function first(value: string | string[] | undefined) {
 export default async function NewDocumentPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams
   const error = first(params.error)
-  const types = await getPrisma().documentType.findMany({ orderBy: { name: 'asc' } })
+  const types = await listDocumentTypes()
   const categories = await listCategoryOptions()
 
   return (
@@ -34,7 +34,7 @@ export default async function NewDocumentPage({ searchParams }: { searchParams: 
             <option value="">Wybierz…</option>
             {types.map((type) => (
               <option key={type.id} value={type.id}>
-                {type.name}
+                {type.label}
               </option>
             ))}
           </select>

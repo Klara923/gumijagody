@@ -11,6 +11,7 @@ const links = [
   { href: '/documents/upload', label: 'Upload' },
   { href: '/ksef/import', label: 'KSeF' },
   { href: '/ksef/schedule', label: 'Harmonogram' },
+  { href: '/document-types', label: 'Typy' },
   { href: '/categories', label: 'Kategorie' },
   { href: '/contractors', label: 'Kontrahenci' },
 ]

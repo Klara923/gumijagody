@@ -12,9 +12,9 @@ import {
 } from '@/components/ui-kit'
 import { listCategoryOptions } from '@/server/categories/list-categories'
 import { listContractors } from '@/server/contractors/list-contractors'
+import { listDocumentTypes } from '@/server/document-types/list-document-types'
 import { listDocuments } from '@/server/documents/list-documents'
 import { listDocumentsQuerySchema } from '@/server/documents/schemas'
-import { getPrisma } from '@/server/infrastructure/db/prisma'
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>
 
@@ -37,7 +37,7 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Se
     dueDateTo: first(params.dueDateTo),
   })
 
-  const types = await getPrisma().documentType.findMany({ orderBy: { name: 'asc' } })
+  const types = await listDocumentTypes()
   const categories = await listCategoryOptions()
   const contractors = await listContractors()
   const items = parsed.success ? await listDocuments(parsed.data) : []
@@ -62,7 +62,7 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Se
             <option value="">Wszystkie</option>
             {types.map((type) => (
               <option key={type.id} value={type.id}>
-                {type.name}
+                {type.label}
               </option>
             ))}
           </select>

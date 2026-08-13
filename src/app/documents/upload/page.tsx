@@ -5,8 +5,8 @@ import {
   buttonClassName,
   controlClassName,
 } from '@/components/ui-kit'
+import { listDocumentTypes } from '@/server/document-types/list-document-types'
 import { uploadDocumentAction } from '@/server/documents/actions'
-import { getPrisma } from '@/server/infrastructure/db/prisma'
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>
 
@@ -21,7 +21,7 @@ export default async function UploadDocumentPage({
 }) {
   const params = await searchParams
   const error = first(params.error)
-  const types = await getPrisma().documentType.findMany({ orderBy: { name: 'asc' } })
+  const types = await listDocumentTypes()
 
   return (
     <PageShell
@@ -51,7 +51,7 @@ export default async function UploadDocumentPage({
               <option value="">Wybierz…</option>
               {types.map((type) => (
                 <option key={type.id} value={type.id}>
-                  {type.name}
+                  {type.label}
                 </option>
               ))}
             </select>
