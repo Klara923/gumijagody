@@ -45,7 +45,7 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Se
   return (
     <PageShell
       title="Rejestr dokumentów"
-      description="Zaakceptowane dokumenty. Filtruj, pokaż lub ukryj kolumny i otwieraj szczegóły."
+      description="Zaakceptowane dokumenty. Filtruj, układaj kolumny i otwieraj szczegóły."
       flash={parsed.success ? null : { message: parsed.error.issues[0]?.message ?? 'Nieprawidłowe filtry' }}
       actions={
         <Link href="/documents/new" className={buttonClassName}>

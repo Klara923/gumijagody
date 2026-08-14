@@ -10,7 +10,12 @@ const registerColumnIdSchema = z.enum(
 )
 
 export const updateRegisterColumnsBodySchema = z.object({
-  visibleColumns: z.array(registerColumnIdSchema).min(1, 'Zostaw co najmniej jedną kolumnę'),
+  visibleColumns: z
+    .array(registerColumnIdSchema)
+    .min(1, 'Zostaw co najmniej jedną kolumnę')
+    .refine((ids) => new Set(ids).size === ids.length, {
+      message: 'Kolumny nie mogą się powtarzać',
+    }),
 })
 
 export type UpdateRegisterColumnsInput = z.infer<typeof updateRegisterColumnsBodySchema>

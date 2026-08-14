@@ -95,8 +95,51 @@ const allowedIds = new Set<string>(REGISTER_COLUMN_IDS)
 const columnsById = new Map(REGISTER_COLUMNS.map((column) => [column.id, column]))
 
 export function resolveVisibleColumns(stored: string[] | null | undefined): RegisterColumnId[] {
-  const visible = (stored ?? []).filter((id): id is RegisterColumnId => allowedIds.has(id))
+  const seen = new Set<RegisterColumnId>()
+  const visible: RegisterColumnId[] = []
+  for (const id of stored ?? []) {
+    if (!allowedIds.has(id)) continue
+    const columnId = id as RegisterColumnId
+    if (seen.has(columnId)) continue
+    seen.add(columnId)
+    visible.push(columnId)
+  }
   return visible.length > 0 ? visible : DEFAULT_VISIBLE_COLUMNS
+}
+
+export function toggleVisibleColumn(
+  current: RegisterColumnId[],
+  columnId: RegisterColumnId,
+  visible: boolean,
+): RegisterColumnId[] | null {
+  if (visible) {
+    return current.includes(columnId) ? current : [...current, columnId]
+  }
+  const next = current.filter((id) => id !== columnId)
+  return next.length === 0 ? null : next
+}
+
+export function reorderVisibleColumn(
+  current: RegisterColumnId[],
+  columnId: RegisterColumnId,
+  toIndex: number,
+): RegisterColumnId[] {
+  const fromIndex = current.indexOf(columnId)
+  if (fromIndex < 0 || toIndex < 0 || toIndex >= current.length || fromIndex === toIndex) {
+    return current
+  }
+  const next = [...current]
+  const [moved] = next.splice(fromIndex, 1)
+  next.splice(toIndex, 0, moved)
+  return next
+}
+
+export function moveVisibleColumn(
+  current: RegisterColumnId[],
+  columnId: RegisterColumnId,
+  direction: -1 | 1,
+): RegisterColumnId[] {
+  return reorderVisibleColumn(current, columnId, current.indexOf(columnId) + direction)
 }
 
 export function getRegisterColumn(columnId: RegisterColumnId) {
