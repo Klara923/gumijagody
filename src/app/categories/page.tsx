@@ -8,6 +8,7 @@ import {
   buttonSecondaryClassName,
   controlClassName,
 } from '@/components/ui-kit'
+import { first } from '@/lib/search-params'
 import {
   createCategoryAction,
   createKeywordRuleAction,
@@ -21,10 +22,6 @@ import type { CategoryNode } from '@/server/categories/list-categories'
 import { listKeywordRules } from '@/server/categories/list-keyword-rules'
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>
-
-function first(value: string | string[] | undefined) {
-  return Array.isArray(value) ? value[0] : value
-}
 
 function CategoryBranch({ nodes, depth = 0 }: { nodes: CategoryNode[]; depth?: number }) {
   return (

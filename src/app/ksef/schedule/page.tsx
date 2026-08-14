@@ -16,19 +16,16 @@ import {
   trClassName,
 } from '@/components/ui-kit'
 import { IMPORT_STATUS, INVOICE_KIND } from '@/lib/labels'
-import { getPrisma } from '@/server/infrastructure/db/prisma'
+import { first } from '@/lib/search-params'
 import {
   removeScheduleTimeAction,
   runScheduleNowAction,
   updateScheduleSettingsAction,
 } from '@/server/schedule/actions'
+import { listImportRuns } from '@/server/schedule/list-import-runs'
 import { getScheduleSettings } from '@/server/schedule/settings'
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>
-
-function first(value: string | string[] | undefined) {
-  return Array.isArray(value) ? value[0] : value
-}
 
 export default async function KsefSchedulePage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams
@@ -39,11 +36,7 @@ export default async function KsefSchedulePage({ searchParams }: { searchParams:
   const duplicates = first(params.duplicates)
 
   const settings = await getScheduleSettings()
-  const recentRuns = await getPrisma().importRun.findMany({
-    where: { trigger: 'SCHEDULED' },
-    orderBy: { startedAt: 'desc' },
-    take: 10,
-  })
+  const recentRuns = await listImportRuns()
 
   return (
     <PageShell

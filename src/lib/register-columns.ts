@@ -1,7 +1,20 @@
-import { documentSourceLabel } from '@/lib/labels'
-import type { mapDocument } from '@/server/documents/mapper'
+import { DOCUMENT_SOURCE, documentSourceLabel } from '@/lib/labels'
 
-export type RegisterDocument = ReturnType<typeof mapDocument>
+export type RegisterDocument = {
+  id: string
+  number: string
+  type: { name: string }
+  contractor: { name: string; nip: string | null }
+  category: { name: string } | null
+  issueDate: string
+  dueDate: string | null
+  netAmount: string
+  vatAmount: string
+  grossAmount: string
+  currency: string
+  source: keyof typeof DOCUMENT_SOURCE
+  ksefNumber: string | null
+}
 
 export const REGISTER_VIEW = 'documents-register'
 

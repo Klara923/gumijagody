@@ -13,6 +13,7 @@ import {
   trClassName,
 } from '@/components/ui-kit'
 import { DOCUMENT_DIRECTION } from '@/lib/labels'
+import { first } from '@/lib/search-params'
 import {
   createDocumentTypeAction,
   deleteDocumentTypeAction,
@@ -21,10 +22,6 @@ import {
 import { listDocumentTypes } from '@/server/document-types/list-document-types'
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>
-
-function first(value: string | string[] | undefined) {
-  return Array.isArray(value) ? value[0] : value
-}
 
 export default async function DocumentTypesPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams

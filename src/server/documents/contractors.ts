@@ -2,7 +2,7 @@ import type { Prisma } from '@/generated/prisma/client'
 
 import { DocumentError } from './errors'
 
-type ContractorInput = {
+export type ContractorInput = {
   name: string
   nip?: string
   street?: string

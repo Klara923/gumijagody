@@ -15,14 +15,11 @@ import {
   trClassName,
 } from '@/components/ui-kit'
 import { DOCUMENT_SOURCE } from '@/lib/labels'
+import { first } from '@/lib/search-params'
 import { acceptDocumentsAction } from '@/server/documents/actions'
 import { listDocuments } from '@/server/documents/list-documents'
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>
-
-function first(value: string | string[] | undefined) {
-  return Array.isArray(value) ? value[0] : value
-}
 
 export default async function BufferPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams

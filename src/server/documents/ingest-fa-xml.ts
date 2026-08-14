@@ -1,9 +1,9 @@
 import { createHash } from 'node:crypto'
 
 import type { DocumentDirection, DocumentSource } from '@/generated/prisma/client'
-import { resolveDocumentCategoryId } from '@/server/categories/resolve-document-category'
 import { getEnv } from '@/server/env'
 import { getPrisma } from '@/server/infrastructure/db/prisma'
+import { isPrismaUniqueViolation } from '@/server/infrastructure/db/unique-violation'
 import {
   isValidBankAccount,
   isValidNip,
@@ -11,9 +11,8 @@ import {
   toCents,
 } from '@/server/validation'
 
-import { resolveContractor } from './contractors'
-import { DocumentError, isPrismaUniqueViolation } from './errors'
-import { DOCUMENT_INCLUDE, mapDocument } from './mapper'
+import { DocumentError } from './errors'
+import { documentNumberConflict, insertDocument } from './insert-document'
 import { parseFaXml } from './parse-fa-xml'
 
 export function checksumOf(content: Buffer): string {
@@ -141,56 +140,34 @@ export async function ingestFaXmlDocument(input: IngestFaXmlInput) {
   const prisma = getPrisma()
 
   try {
-    const document = await prisma.$transaction(async (tx) => {
-      const contractorId = await resolveContractor(tx, contractorFromParty(counterparty))
-      const contractor = await tx.contractor.findUniqueOrThrow({ where: { id: contractorId } })
-      const categoryId = await resolveDocumentCategoryId(tx, {
-        contractorDefaultCategoryId: contractor.defaultCategoryId,
-        texts: [
-          parsed.number,
-          contractor.name,
-          contractor.nip,
-          ...parsed.lines.map((line) => line.name),
-        ],
-      })
-
-      const created = await tx.document.create({
-        data: {
-          number: parsed.number,
-          typeId: type.id,
-          contractorId,
-          issueDate,
-          dueDate: dueDate ?? null,
-          netAmount: parsed.netAmount,
-          vatAmount: parsed.vatAmount,
-          grossAmount: parsed.grossAmount,
-          currency: parsed.currency,
-          paymentAccount: optionalValidAccount(parsed.paymentAccount) ?? null,
-          categoryId,
-          source: input.source,
-          ksefNumber: input.ksefNumber ?? null,
-          stage: 'BUFFER',
-          importRunId: input.importRunId ?? null,
-        },
-        include: DOCUMENT_INCLUDE,
-      })
-
-      await tx.attachment.create({
-        data: {
-          documentId: created.id,
+    const document = await prisma.$transaction((tx) =>
+      insertDocument(tx, {
+        number: parsed.number,
+        typeId: type.id,
+        contractor: contractorFromParty(counterparty),
+        issueDate,
+        dueDate: dueDate ?? null,
+        netAmount: parsed.netAmount,
+        vatAmount: parsed.vatAmount,
+        grossAmount: parsed.grossAmount,
+        currency: parsed.currency,
+        paymentAccount: optionalValidAccount(parsed.paymentAccount) ?? null,
+        extraCategoryTexts: parsed.lines.map((line) => line.name),
+        source: input.source,
+        stage: 'BUFFER',
+        ksefNumber: input.ksefNumber ?? null,
+        importRunId: input.importRunId ?? null,
+        attachment: {
           kind: 'KSEF_XML',
           filename: input.filename,
           mimeType: 'application/xml',
-          sizeBytes: content.byteLength,
+          content,
           checksum,
-          content: Uint8Array.from(content),
         },
-      })
+      }),
+    )
 
-      return created
-    })
-
-    return { status: 'created' as const, document: mapDocument(document) }
+    return { status: 'created' as const, document }
   } catch (error) {
     if (error instanceof DocumentError) throw error
     if (isPrismaUniqueViolation(error)) {
@@ -203,10 +180,7 @@ export async function ingestFaXmlDocument(input: IngestFaXmlInput) {
           return { status: 'duplicate' as const, documentId: existing.id }
         }
       }
-      throw new DocumentError(
-        `Dokument o numerze "${parsed.number}" dla tego kontrahenta już istnieje`,
-        409,
-      )
+      throw documentNumberConflict(parsed.number)
     }
     throw error
   }

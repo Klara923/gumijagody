@@ -9,15 +9,12 @@ import {
   thClassName,
   trClassName,
 } from '@/components/ui-kit'
+import { first } from '@/lib/search-params'
 import { updateContractorDefaultCategoryAction } from '@/server/categories/actions'
 import { listCategoryOptions } from '@/server/categories/list-categories'
 import { listContractors } from '@/server/contractors/list-contractors'
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>
-
-function first(value: string | string[] | undefined) {
-  return Array.isArray(value) ? value[0] : value
-}
 
 export default async function ContractorsPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams

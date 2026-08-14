@@ -19,7 +19,7 @@ import {
   getRegisterColumn,
   type RegisterColumnId,
   type RegisterDocument,
-} from '@/server/table-preferences/register-columns'
+} from '@/lib/register-columns'
 
 function sameColumns(left: RegisterColumnId[], right: RegisterColumnId[]) {
   return left.length === right.length && left.every((id, index) => id === right[index])

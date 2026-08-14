@@ -5,7 +5,7 @@ import {
   REGISTER_VIEW,
   resolveVisibleColumns,
   type RegisterColumnId,
-} from './register-columns'
+} from '@/lib/register-columns'
 
 export async function getRegisterVisibleColumns(): Promise<RegisterColumnId[]> {
   const preference = await getPrisma().tablePreference.findUnique({

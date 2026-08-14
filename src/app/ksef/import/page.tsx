@@ -1,13 +1,10 @@
 import Link from 'next/link'
 
 import { Card, Field, PageShell, buttonClassName, buttonSecondaryClassName, controlClassName } from '@/components/ui-kit'
+import { first } from '@/lib/search-params'
 import { importFromKsefAction } from '@/server/documents/actions'
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>
-
-function first(value: string | string[] | undefined) {
-  return Array.isArray(value) ? value[0] : value
-}
 
 function todayIso(): string {
   return new Date().toISOString().slice(0, 10)

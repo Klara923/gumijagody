@@ -1,6 +1,6 @@
 import { getPrisma } from '@/server/infrastructure/db/prisma'
 
-import { REGISTER_VIEW, resolveVisibleColumns } from './register-columns'
+import { REGISTER_VIEW, resolveVisibleColumns } from '@/lib/register-columns'
 import type { UpdateRegisterColumnsInput } from './schemas'
 
 export async function updateRegisterVisibleColumns(input: UpdateRegisterColumnsInput) {

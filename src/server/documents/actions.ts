@@ -1,14 +1,12 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { isRedirectError } from 'next/dist/client/components/redirect-error'
 import { redirect } from 'next/navigation'
 
 import { acceptDocuments } from '@/server/documents/accept-documents'
 import { assignDocumentCategory } from '@/server/documents/assign-category'
 import { createDocument } from '@/server/documents/create-document'
 import { deleteDocument } from '@/server/documents/delete-document'
-import { DocumentError } from '@/server/documents/errors'
 import { importFromKsef } from '@/server/documents/import-from-ksef'
 import {
   acceptDocumentsBodySchema,
@@ -18,18 +16,7 @@ import {
 } from '@/server/documents/schemas'
 import { updateDocument } from '@/server/documents/update-document'
 import { uploadDocument } from '@/server/documents/upload-document'
-import { CategoryError } from '@/server/categories/errors'
-import { KsefError } from '@/server/infrastructure/ksef/errors'
-
-function formString(formData: FormData, key: string) {
-  const value = formData.get(key)
-  return typeof value === 'string' ? value : ''
-}
-
-function optionalFormString(formData: FormData, key: string) {
-  const value = formString(formData, key).trim()
-  return value === '' ? undefined : value
-}
+import { formString, optionalFormString, redirectWithError } from '@/server/http/form'
 
 function contractorFromForm(formData: FormData) {
   return {
@@ -40,22 +27,6 @@ function contractorFromForm(formData: FormData) {
     city: optionalFormString(formData, 'contractorCity'),
     bankAccount: optionalFormString(formData, 'contractorBankAccount'),
   }
-}
-
-function redirectWithError(path: string, error: unknown): never {
-  if (isRedirectError(error)) throw error
-
-  const message =
-    error instanceof DocumentError ||
-    error instanceof KsefError ||
-    error instanceof CategoryError
-      ? error.message
-      : typeof error === 'string'
-        ? error
-        : error instanceof Error
-          ? error.message
-          : 'Nieoczekiwany błąd'
-  redirect(`${path}?error=${encodeURIComponent(message)}`)
 }
 
 export async function createDocumentAction(formData: FormData) {

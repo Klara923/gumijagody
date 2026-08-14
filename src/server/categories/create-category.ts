@@ -1,5 +1,5 @@
 import { getPrisma } from '@/server/infrastructure/db/prisma'
-import { isPrismaUniqueViolation } from '@/server/documents/errors'
+import { isPrismaUniqueViolation } from '@/server/infrastructure/db/unique-violation'
 
 import { CategoryError } from './errors'
 import type { CreateCategoryInput } from './schemas'

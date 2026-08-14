@@ -2,6 +2,7 @@ import Link from 'next/link'
 
 import { RegisterColumnsTable } from '@/components/register-columns-table'
 import { Card, Field, PageShell, buttonClassName, buttonSecondaryClassName, controlClassName } from '@/components/ui-kit'
+import { first } from '@/lib/search-params'
 import { listCategoryOptions } from '@/server/categories/list-categories'
 import { listContractors } from '@/server/contractors/list-contractors'
 import { listDocumentTypes } from '@/server/document-types/list-document-types'
@@ -10,10 +11,6 @@ import { listDocumentsQuerySchema } from '@/server/documents/schemas'
 import { getRegisterVisibleColumns } from '@/server/table-preferences/get-table-preference'
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>
-
-function first(value: string | string[] | undefined) {
-  return Array.isArray(value) ? value[0] : value
-}
 
 export default async function DocumentsPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams

@@ -1,13 +1,10 @@
 import { Card, Field, PageShell, buttonClassName, controlClassName } from '@/components/ui-kit'
 import { APP_NAME, COMPANY_CONTEXT_LABEL, COMPANY_NAME } from '@/lib/brand'
+import { first } from '@/lib/search-params'
 import { safeInternalPath } from '@/lib/session'
 import { loginAction } from '@/server/auth/actions'
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>
-
-function first(value: string | string[] | undefined) {
-  return Array.isArray(value) ? value[0] : value
-}
 
 export default async function LoginPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams

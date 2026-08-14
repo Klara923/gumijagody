@@ -1,8 +1,9 @@
 import { getPrisma } from '@/server/infrastructure/db/prisma'
+import { isPrismaUniqueViolation } from '@/server/infrastructure/db/unique-violation'
 import { toCents } from '@/server/validation'
 
 import { resolveContractor, requireContractorId } from './contractors'
-import { DocumentError, isPrismaUniqueViolation } from './errors'
+import { DocumentError } from './errors'
 import { DOCUMENT_INCLUDE, mapDocument } from './mapper'
 import { assertDocumentMutable } from './policy'
 import type { UpdateDocumentInput } from './schemas'

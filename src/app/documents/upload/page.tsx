@@ -1,13 +1,10 @@
 import { ContractorLookupFields } from '@/components/contractor-lookup-fields'
 import { Card, Field, PageShell, buttonClassName, controlClassName } from '@/components/ui-kit'
+import { first } from '@/lib/search-params'
 import { listDocumentTypes } from '@/server/document-types/list-document-types'
 import { uploadDocumentAction } from '@/server/documents/actions'
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>
-
-function first(value: string | string[] | undefined) {
-  return Array.isArray(value) ? value[0] : value
-}
 
 export default async function UploadDocumentPage({
   searchParams,

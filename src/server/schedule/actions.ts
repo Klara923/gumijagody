@@ -1,39 +1,15 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { isRedirectError } from 'next/dist/client/components/redirect-error'
 import { redirect } from 'next/navigation'
 
-import { CategoryError } from '@/server/categories/errors'
-import { DocumentError } from '@/server/documents/errors'
-import { KsefError } from '@/server/infrastructure/ksef/errors'
+import { formString, redirectWithError } from '@/server/http/form'
 import { runScheduledKsefImport } from '@/server/schedule/run-scheduled-import'
 import {
   normalizeTimeHhMm,
   updateScheduleSettingsBodySchema,
 } from '@/server/schedule/schemas'
 import { updateScheduleSettings } from '@/server/schedule/settings'
-
-function formString(formData: FormData, key: string) {
-  const value = formData.get(key)
-  return typeof value === 'string' ? value : ''
-}
-
-function redirectWithError(path: string, error: unknown): never {
-  if (isRedirectError(error)) throw error
-
-  const message =
-    error instanceof DocumentError ||
-    error instanceof KsefError ||
-    error instanceof CategoryError
-      ? error.message
-      : typeof error === 'string'
-        ? error
-        : error instanceof Error
-          ? error.message
-          : 'Nieoczekiwany błąd'
-  redirect(`${path}?error=${encodeURIComponent(message)}`)
-}
 
 export async function updateScheduleSettingsAction(formData: FormData) {
   const runTimes = formData

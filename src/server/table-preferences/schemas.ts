@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { REGISTER_COLUMNS } from './register-columns'
+import { REGISTER_COLUMNS } from '@/lib/register-columns'
 
 const registerColumnIdSchema = z.enum(
   REGISTER_COLUMNS.map((column) => column.id) as [

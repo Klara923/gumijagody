@@ -1,4 +1,4 @@
-import { isPrismaUniqueViolation } from '@/server/documents/errors'
+import { isPrismaUniqueViolation } from '@/server/infrastructure/db/unique-violation'
 import { getPrisma } from '@/server/infrastructure/db/prisma'
 
 import { DocumentTypeError } from './errors'

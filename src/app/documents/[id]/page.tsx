@@ -12,6 +12,7 @@ import {
   controlClassName,
 } from '@/components/ui-kit'
 import { DOCUMENT_SOURCE, DOCUMENT_STAGE } from '@/lib/labels'
+import { first } from '@/lib/search-params'
 import { listCategoryOptions } from '@/server/categories/list-categories'
 import { listDocumentTypes } from '@/server/document-types/list-document-types'
 import {
@@ -25,10 +26,6 @@ import { MUTABLE_DOCUMENT_SOURCES } from '@/server/documents/policy'
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>
 type RouteParams = Promise<{ id: string }>
-
-function first(value: string | string[] | undefined) {
-  return Array.isArray(value) ? value[0] : value
-}
 
 export default async function DocumentDetailPage({
   params,

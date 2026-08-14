@@ -1,14 +1,11 @@
 import { ContractorLookupFields } from '@/components/contractor-lookup-fields'
 import { Card, Field, PageShell, buttonClassName, controlClassName } from '@/components/ui-kit'
+import { first } from '@/lib/search-params'
 import { listCategoryOptions } from '@/server/categories/list-categories'
 import { listDocumentTypes } from '@/server/document-types/list-document-types'
 import { createDocumentAction } from '@/server/documents/actions'
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>
-
-function first(value: string | string[] | undefined) {
-  return Array.isArray(value) ? value[0] : value
-}
 
 export default async function NewDocumentPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams

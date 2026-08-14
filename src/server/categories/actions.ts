@@ -1,14 +1,12 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { isRedirectError } from 'next/dist/client/components/redirect-error'
 import { redirect } from 'next/navigation'
 
 import { createCategory } from '@/server/categories/create-category'
 import { createKeywordRule } from '@/server/categories/create-keyword-rule'
 import { deleteCategory } from '@/server/categories/delete-category'
 import { deleteKeywordRule } from '@/server/categories/delete-keyword-rule'
-import { CategoryError } from '@/server/categories/errors'
 import {
   createCategoryBodySchema,
   createKeywordRuleBodySchema,
@@ -19,30 +17,7 @@ import {
 import { updateCategory } from '@/server/categories/update-category'
 import { updateKeywordRule } from '@/server/categories/update-keyword-rule'
 import { updateContractorDefaultCategory } from '@/server/contractors/update-default-category'
-
-function formString(formData: FormData, key: string) {
-  const value = formData.get(key)
-  return typeof value === 'string' ? value : ''
-}
-
-function optionalFormString(formData: FormData, key: string) {
-  const value = formString(formData, key).trim()
-  return value === '' ? undefined : value
-}
-
-function redirectWithError(path: string, error: unknown): never {
-  if (isRedirectError(error)) throw error
-
-  const message =
-    error instanceof CategoryError
-      ? error.message
-      : typeof error === 'string'
-        ? error
-        : error instanceof Error
-          ? error.message
-          : 'Nieoczekiwany błąd'
-  redirect(`${path}?error=${encodeURIComponent(message)}`)
-}
+import { formString, optionalFormString, redirectWithError } from '@/server/http/form'
 
 export async function createCategoryAction(formData: FormData) {
   const raw = {
