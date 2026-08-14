@@ -34,15 +34,16 @@ export async function GET(request: Request) {
     issueDateTo: url.searchParams.get('issueDateTo') ?? undefined,
     dueDateFrom: url.searchParams.get('dueDateFrom') ?? undefined,
     dueDateTo: url.searchParams.get('dueDateTo') ?? undefined,
+    page: url.searchParams.get('page') ?? undefined,
   })
 
   if (!parsed.success) {
     return validationResponse('Nieprawidłowe parametry zapytania', parsed.error)
   }
 
-  const items = await listDocuments(parsed.data)
+  const listed = await listDocuments(parsed.data)
 
-  return NextResponse.json({ items })
+  return NextResponse.json(listed)
 }
 
 export async function POST(request: Request) {

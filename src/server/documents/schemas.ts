@@ -29,6 +29,10 @@ export const listDocumentsQuerySchema = z
     issueDateTo: emptyToUndefined(dateOnly.optional()),
     dueDateFrom: emptyToUndefined(dateOnly.optional()),
     dueDateTo: emptyToUndefined(dateOnly.optional()),
+    page: z.preprocess(
+      (value) => (value === '' || value === null || value === undefined ? 1 : value),
+      z.coerce.number().int().min(1).max(10_000),
+    ),
   })
   .refine(
     (query) =>

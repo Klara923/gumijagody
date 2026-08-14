@@ -1,6 +1,7 @@
 import Link from 'next/link'
 
 import { RegisterColumnsTable } from '@/components/register-columns-table'
+import { ListPagination } from '@/components/list-pagination'
 import { Card, Field, PageShell, buttonClassName, buttonSecondaryClassName, controlClassName } from '@/components/ui-kit'
 import { first } from '@/lib/search-params'
 import { listCategoryOptions } from '@/server/categories/list-categories'
@@ -25,12 +26,14 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Se
     issueDateTo: first(params.issueDateTo),
     dueDateFrom: first(params.dueDateFrom),
     dueDateTo: first(params.dueDateTo),
+    page: first(params.page),
   })
 
   const types = await listDocumentTypes()
   const categories = await listCategoryOptions()
   const contractors = await listContractors()
-  const items = parsed.success ? await listDocuments(parsed.data) : []
+  const listed = parsed.success ? await listDocuments(parsed.data) : null
+  const items = listed?.items ?? []
   const visibleColumns = await getRegisterVisibleColumns()
   const hasFilters = Boolean(
     first(params.typeId) ||
@@ -152,6 +155,15 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Se
       </Card>
 
       <RegisterColumnsTable documents={items} initialVisibleColumns={visibleColumns} />
+      {listed ? (
+        <ListPagination
+          pathname="/documents"
+          searchParams={params}
+          page={listed.page}
+          pageSize={listed.pageSize}
+          hasMore={listed.hasMore}
+        />
+      ) : null}
     </PageShell>
   )
 }

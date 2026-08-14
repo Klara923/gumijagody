@@ -6,6 +6,8 @@ import { getPrisma } from '@/server/infrastructure/db/prisma'
 import { DOCUMENT_INCLUDE, mapDocument } from './mapper'
 import type { ListDocumentsQuery } from './schemas'
 
+export const DOCUMENT_PAGE_SIZE = 50
+
 export async function listDocuments(query: ListDocumentsQuery) {
   const categoryIds = query.categoryId
     ? await listCategorySubtreeIds(query.categoryId)
@@ -34,11 +36,17 @@ export async function listDocuments(query: ListDocumentsQuery) {
       : {}),
   }
 
-  const documents = await getPrisma().document.findMany({
+  const page = query.page
+  const rows = await getPrisma().document.findMany({
     where,
     orderBy: { [query.sortBy]: query.sortOrder },
     include: DOCUMENT_INCLUDE,
+    skip: (page - 1) * DOCUMENT_PAGE_SIZE,
+    take: DOCUMENT_PAGE_SIZE + 1,
   })
 
-  return documents.map(mapDocument)
+  const hasMore = rows.length > DOCUMENT_PAGE_SIZE
+  const items = (hasMore ? rows.slice(0, DOCUMENT_PAGE_SIZE) : rows).map(mapDocument)
+
+  return { items, page, pageSize: DOCUMENT_PAGE_SIZE, hasMore }
 }
