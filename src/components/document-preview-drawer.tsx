@@ -78,6 +78,7 @@ function DocumentPreviewDrawer({
   return (
     <dialog
       ref={dialogRef}
+      data-testid="document-preview-drawer"
       aria-labelledby={titleId}
       onClose={onClose}
       onClick={(event) => {

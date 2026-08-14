@@ -16,6 +16,9 @@ describe('register columns', () => {
 
   it('falls back to defaults when nothing valid is stored', () => {
     expect(resolveVisibleColumns([])).toEqual(DEFAULT_VISIBLE_COLUMNS)
+    expect(resolveVisibleColumns(null)).toEqual(DEFAULT_VISIBLE_COLUMNS)
+    expect(resolveVisibleColumns(undefined)).toEqual(DEFAULT_VISIBLE_COLUMNS)
+    expect(resolveVisibleColumns(['nope', 'also-nope'])).toEqual(DEFAULT_VISIBLE_COLUMNS)
   })
 
   it('appends a shown column instead of resetting catalog order', () => {

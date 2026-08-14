@@ -51,4 +51,9 @@ describe('toCents', () => {
     expect(toCents('12')).toBe(1200)
     expect(toCents('-1.25')).toBe(-125)
   })
+
+  it('treats gross as net plus VAT in cents', () => {
+    expect(toCents('100.00') + toCents('23.00')).toBe(toCents('123.00'))
+    expect(toCents('4001.49') + toCents('0')).toBe(toCents('4001.49'))
+  })
 })
