@@ -5,9 +5,10 @@ import { buttonSecondaryClassName } from '@/components/ui-kit'
 type Props = {
   src: string
   filename: string
+  iframeClassName?: string
 }
 
-export function PdfPreviewFrame({ src, filename }: Props) {
+export function PdfPreviewFrame({ src, filename, iframeClassName }: Props) {
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2 text-sm">
@@ -25,7 +26,9 @@ export function PdfPreviewFrame({ src, filename }: Props) {
       <iframe
         src={src}
         title={`Podgląd PDF: ${filename}`}
-        className="h-[75vh] w-full rounded-xl border border-border bg-muted"
+        className={
+          iframeClassName ?? 'h-[75vh] w-full rounded-xl border border-border bg-muted'
+        }
       />
     </div>
   )

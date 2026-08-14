@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useRef, useState, type DragEvent } from 'react'
 
+import { PreviewButton } from '@/components/document-preview-drawer'
 import {
   Card,
   CardTitle,
@@ -247,9 +248,7 @@ export function RegisterColumnsTable({
                     </td>
                   ))}
                   <td className={`${tdClassName} space-x-3 whitespace-nowrap`}>
-                    <Link href={`/documents/${document.id}/preview`} className={textLinkClassName}>
-                      Podgląd
-                    </Link>
+                    <PreviewButton documentId={document.id} />
                     <Link href={`/documents/${document.id}`} className={textLinkClassName}>
                       Szczegóły
                     </Link>

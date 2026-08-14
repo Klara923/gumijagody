@@ -1,5 +1,6 @@
 import Link from 'next/link'
 
+import { PreviewButton } from '@/components/document-preview-drawer'
 import { SelectAllCheckbox } from '@/components/select-all-checkbox'
 import {
   Card,
@@ -107,9 +108,7 @@ export default async function BufferPage({ searchParams }: { searchParams: Searc
                       <EnumBadge value={document.source} labels={DOCUMENT_SOURCE} />
                     </td>
                     <td className={`${tdClassName} space-x-3 whitespace-nowrap`}>
-                      <Link href={`/documents/${document.id}/preview`} className={textLinkClassName}>
-                        Podgląd
-                      </Link>
+                      <PreviewButton documentId={document.id} />
                       <Link href={`/documents/${document.id}`} className={textLinkClassName}>
                         Szczegóły
                       </Link>
