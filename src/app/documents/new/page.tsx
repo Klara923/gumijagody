@@ -15,7 +15,7 @@ export default async function NewDocumentPage({ searchParams }: { searchParams: 
 
   return (
     <PageShell
-      title="Nowy dokument"
+      title="Wpis ręczny"
       description="Ręczne dodanie trafia od razu do rejestru."
       flash={error ? { message: error } : null}
     >

@@ -13,7 +13,7 @@ export const DOCUMENT_STAGE = {
 
 export const DOCUMENT_SOURCE = {
   KSEF: { label: 'KSeF', tone: 'info' },
-  UPLOAD: { label: 'Upload', tone: 'neutral' },
+  UPLOAD: { label: 'Wgrany', tone: 'neutral' },
   MANUAL: { label: 'Ręczny', tone: 'neutral' },
 } as const satisfies Record<string, LabelMeta>
 

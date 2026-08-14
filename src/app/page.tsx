@@ -45,7 +45,7 @@ export default function Home() {
       }
       actions={
         <Link href="/documents/new" className={buttonClassName}>
-          Nowy dokument
+          Wpis ręczny
         </Link>
       }
     >

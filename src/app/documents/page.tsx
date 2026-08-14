@@ -49,7 +49,7 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Se
       flash={parsed.success ? null : { message: parsed.error.issues[0]?.message ?? 'Nieprawidłowe filtry' }}
       actions={
         <Link href="/documents/new" className={buttonClassName}>
-          Dodaj dokument
+          Wpis ręczny
         </Link>
       }
     >

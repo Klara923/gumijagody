@@ -17,7 +17,7 @@ export default async function UploadDocumentPage({
 
   return (
     <PageShell
-      title="Upload PDF / XML"
+      title="Wgraj PDF / XML"
       description="XML FA wczytuje dane automatycznie. Przy PDF uzupełnij metadane poniżej."
       flash={error ? { message: error } : null}
     >

@@ -12,7 +12,7 @@ describe('labels', () => {
     expect(documentStageLabel('BUFFER')).toBe('Bufor')
     expect(documentStageLabel('ACCEPTED')).toBe('Rejestr')
     expect(documentSourceLabel('KSEF')).toBe('KSeF')
-    expect(documentSourceLabel('UPLOAD')).toBe('Upload')
+    expect(documentSourceLabel('UPLOAD')).toBe('Wgrany')
     expect(documentSourceLabel('MANUAL')).toBe('Ręczny')
   })
 

@@ -49,7 +49,7 @@ export default async function BufferPage({ searchParams }: { searchParams: Searc
       actions={
         <>
           <Link href="/documents/upload" className={buttonSecondaryClassName}>
-            Upload
+            Wgraj
           </Link>
           <Link href="/ksef/import" className={buttonClassName}>
             Pobierz z KSeF
@@ -64,7 +64,7 @@ export default async function BufferPage({ searchParams }: { searchParams: Searc
         >
           <div className="flex flex-wrap gap-2">
             <Link href="/documents/upload" className={buttonClassName}>
-              Upload PDF / XML
+              Wgraj PDF / XML
             </Link>
             <Link href="/ksef/import" className={buttonSecondaryClassName}>
               Pobierz z KSeF

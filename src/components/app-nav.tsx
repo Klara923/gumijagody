@@ -8,10 +8,10 @@ import { APP_NAME, COMPANY_CONTEXT_LABEL, COMPANY_SHORT } from '@/lib/brand'
 import { cn } from '@/lib/utils'
 
 const primary = [
-  { href: '/documents', label: 'Rejestr' },
   { href: '/buffer', label: 'Bufor' },
-  { href: '/documents/new', label: 'Nowy' },
-  { href: '/documents/upload', label: 'Upload' },
+  { href: '/documents', label: 'Rejestr' },
+  { href: '/documents/new', label: 'Ręczny' },
+  { href: '/documents/upload', label: 'Wgraj' },
   { href: '/ksef/import', label: 'KSeF' },
   { href: '/ksef/schedule', label: 'Harmonogram' },
 ]
