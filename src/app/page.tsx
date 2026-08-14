@@ -1,6 +1,7 @@
 import Link from 'next/link'
 
 import { Card, PageShell, buttonClassName, buttonSecondaryClassName } from '@/components/ui-kit'
+import { APP_NAME, COMPANY_CONTEXT_LABEL, COMPANY_NAME } from '@/lib/brand'
 
 const flow = [
   {
@@ -34,8 +35,14 @@ const settings = [
 export default function Home() {
   return (
     <PageShell
-      title="Gumijagoda"
+      title={APP_NAME}
       description="Ewidencja faktur: KSeF i upload najpierw do bufora, po akceptacji do rejestru. Kategoria z reguły kontrahenta albo słowa kluczowego."
+      meta={
+        <p className="text-sm text-muted-foreground">
+          {COMPANY_CONTEXT_LABEL} w systemie:{' '}
+          <span className="font-medium text-foreground">{COMPANY_NAME}</span>
+        </p>
+      }
       actions={
         <Link href="/documents/new" className={buttonClassName}>
           Nowy dokument

@@ -26,6 +26,8 @@ services:
       KSEF_NIP: ${KSEF_NIP:-}
       KSEF_TOKEN: ${KSEF_TOKEN:-}
       CRON_SECRET: ${CRON_SECRET:-lokalny-sekret-dev}
+      APP_PASSWORD: ${APP_PASSWORD:-gumijagoda}
+      APP_SESSION_SECRET: ${APP_SESSION_SECRET:-}
     ports:
       - '${APP_PORT:-3000}:3000'
     volumes:

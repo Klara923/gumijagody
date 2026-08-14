@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 
 import { AppNav } from '@/components/app-nav'
+import { APP_NAME } from '@/lib/brand'
 
 import './globals.css'
 
@@ -16,7 +17,7 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Gumijagoda — system zarządzania fakturami',
+  title: `${APP_NAME} — ewidencja faktur`,
   description:
     'Ewidencja faktur kosztowych i sprzedażowych: pobieranie z KSeF, bufor, kategoryzacja i podgląd dokumentów.',
 }
@@ -25,7 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="pl" className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
       <body className="flex min-h-svh flex-col bg-background font-sans text-foreground">
-        <AppNav />
+        <AppNav showLogout={Boolean(process.env.APP_PASSWORD)} />
         <div className="flex-1">{children}</div>
       </body>
     </html>

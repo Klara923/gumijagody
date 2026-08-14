@@ -15,6 +15,9 @@ const envSchema = z.object({
   KSEF_TOKEN: optional(z.string().min(1)),
 
   CRON_SECRET: optional(z.string().min(1)),
+
+  APP_PASSWORD: optional(z.string().min(1)),
+  APP_SESSION_SECRET: optional(z.string().min(16)),
 })
 
 export type Env = z.infer<typeof envSchema>
