@@ -152,6 +152,13 @@ export function Field({
 export const controlClassName =
   'h-9 w-full min-w-0 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30'
 
+export const controlInvalidClassName =
+  'border-destructive focus-visible:border-destructive focus-visible:ring-destructive/30'
+
+export function fieldControlClassName(invalid?: boolean) {
+  return cn(controlClassName, invalid && controlInvalidClassName)
+}
+
 export const buttonClassName =
   'inline-flex h-9 shrink-0 cursor-pointer items-center justify-center rounded-md bg-primary px-3.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50'
 

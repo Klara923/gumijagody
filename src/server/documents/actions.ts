@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { isRedirectError } from 'next/dist/client/components/redirect-error'
 import { redirect } from 'next/navigation'
 
 import { acceptDocuments } from '@/server/documents/accept-documents'
@@ -14,9 +15,20 @@ import {
   importFromKsefBodySchema,
   updateDocumentBodySchema,
 } from '@/server/documents/schemas'
+import {
+  fieldErrorsFromCaught,
+  fieldErrorsFromZod,
+  valuesFromFormData,
+} from '@/server/documents/form-field-errors'
 import { updateDocument } from '@/server/documents/update-document'
 import { uploadDocument } from '@/server/documents/upload-document'
 import { formString, optionalFormString, redirectWithError } from '@/server/http/form'
+
+export type CreateDocumentFormState = {
+  errors: Record<string, string>
+  values: Record<string, string>
+  attempt: number
+}
 
 function contractorFromForm(formData: FormData) {
   return {
@@ -29,7 +41,10 @@ function contractorFromForm(formData: FormData) {
   }
 }
 
-export async function createDocumentAction(formData: FormData) {
+export async function createDocumentAction(
+  _prev: CreateDocumentFormState,
+  formData: FormData,
+): Promise<CreateDocumentFormState> {
   const raw = {
     number: formString(formData, 'number'),
     typeId: formString(formData, 'typeId'),
@@ -46,7 +61,7 @@ export async function createDocumentAction(formData: FormData) {
 
   const parsed = createDocumentBodySchema.safeParse(raw)
   if (!parsed.success) {
-    redirectWithError('/documents/new', parsed.error.issues[0]?.message ?? 'Nieprawidłowe dane')
+    return failedCreateDocumentState(_prev, formData, fieldErrorsFromZod(parsed.error))
   }
 
   try {
@@ -55,7 +70,20 @@ export async function createDocumentAction(formData: FormData) {
     revalidatePath('/buffer')
     redirect(`/documents/${document.id}`)
   } catch (error) {
-    redirectWithError('/documents/new', error)
+    if (isRedirectError(error)) throw error
+    return failedCreateDocumentState(_prev, formData, fieldErrorsFromCaught(error))
+  }
+}
+
+function failedCreateDocumentState(
+  prev: CreateDocumentFormState,
+  formData: FormData,
+  errors: Record<string, string>,
+): CreateDocumentFormState {
+  return {
+    errors,
+    values: valuesFromFormData(formData),
+    attempt: (prev.attempt ?? 0) + 1,
   }
 }
 

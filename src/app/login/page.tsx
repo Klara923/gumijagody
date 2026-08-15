@@ -1,8 +1,7 @@
-import { Card, Field, PageShell, buttonClassName, controlClassName } from '@/components/ui-kit'
+import { Card, Field, PageShell, buttonClassName, fieldControlClassName } from '@/components/ui-kit'
 import { APP_NAME, COMPANY_CONTEXT_LABEL, COMPANY_NAME } from '@/lib/brand'
 import { first } from '@/lib/search-params'
 import { safeInternalPath } from '@/lib/session'
-import { cn } from '@/lib/utils'
 import { loginAction } from '@/server/auth/actions'
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>
@@ -27,11 +26,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
               required
               autoComplete="current-password"
               aria-invalid={invalid}
-              className={cn(
-                controlClassName,
-                invalid &&
-                  'border-destructive focus-visible:border-destructive focus-visible:ring-destructive/30',
-              )}
+              className={fieldControlClassName(invalid)}
             />
           </Field>
           <div>

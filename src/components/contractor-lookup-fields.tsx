@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 
-import { Field, buttonSecondaryClassName, controlClassName } from '@/components/ui-kit'
+import { Field, buttonSecondaryClassName, fieldControlClassName } from '@/components/ui-kit'
 
 type LookupResult = {
   name: string
@@ -16,15 +16,19 @@ type LookupResult = {
 
 export function ContractorLookupFields({
   requiredName = false,
+  errors = {},
+  values = {},
 }: {
   requiredName?: boolean
+  errors?: Record<string, string>
+  values?: Record<string, string>
 }) {
-  const [nip, setNip] = useState('')
-  const [name, setName] = useState('')
-  const [street, setStreet] = useState('')
-  const [postalCode, setPostalCode] = useState('')
-  const [city, setCity] = useState('')
-  const [bankAccount, setBankAccount] = useState('')
+  const [nip, setNip] = useState(values.contractorNip ?? '')
+  const [name, setName] = useState(values.contractorName ?? '')
+  const [street, setStreet] = useState(values.contractorStreet ?? '')
+  const [postalCode, setPostalCode] = useState(values.contractorPostalCode ?? '')
+  const [city, setCity] = useState(values.contractorCity ?? '')
+  const [bankAccount, setBankAccount] = useState(values.contractorBankAccount ?? '')
   const [status, setStatus] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [whitelist, setWhitelist] = useState<string | null>(null)
@@ -96,7 +100,7 @@ export function ContractorLookupFields({
 
   return (
     <div className="grid gap-3">
-      <Field label="Kontrahent — NIP">
+      <Field label="Kontrahent — NIP" error={errors.contractorNip}>
         <div className="flex gap-2">
           <input
             name="contractorNip"
@@ -105,7 +109,8 @@ export function ContractorLookupFields({
             inputMode="numeric"
             autoComplete="off"
             placeholder="10 cyfr"
-            className={`${controlClassName} min-w-0 flex-1`}
+            aria-invalid={Boolean(errors.contractorNip)}
+            className={`${fieldControlClassName(Boolean(errors.contractorNip))} min-w-0 flex-1`}
           />
           <button
             type="button"
@@ -123,43 +128,47 @@ export function ContractorLookupFields({
       >
         {error ?? status}
       </p>
-      <Field label="Kontrahent — nazwa">
+      <Field label="Kontrahent — nazwa" error={errors.contractorName}>
         <input
           name="contractorName"
           value={name}
           onChange={(event) => setName(event.target.value)}
           required={requiredName}
-          className={controlClassName}
+          aria-invalid={Boolean(errors.contractorName)}
+          className={fieldControlClassName(Boolean(errors.contractorName))}
         />
       </Field>
-      <Field label="Ulica (opcjonalnie)">
+      <Field label="Ulica (opcjonalnie)" error={errors.contractorStreet}>
         <input
           name="contractorStreet"
           value={street}
           onChange={(event) => setStreet(event.target.value)}
-          className={controlClassName}
+          aria-invalid={Boolean(errors.contractorStreet)}
+          className={fieldControlClassName(Boolean(errors.contractorStreet))}
         />
       </Field>
       <div className="grid gap-3 sm:grid-cols-2">
-        <Field label="Kod pocztowy (opcjonalnie)">
+        <Field label="Kod pocztowy (opcjonalnie)" error={errors.contractorPostalCode}>
           <input
             name="contractorPostalCode"
             value={postalCode}
             onChange={(event) => setPostalCode(event.target.value)}
             placeholder="00-000"
-            className={controlClassName}
+            aria-invalid={Boolean(errors.contractorPostalCode)}
+            className={fieldControlClassName(Boolean(errors.contractorPostalCode))}
           />
         </Field>
-        <Field label="Miasto (opcjonalnie)">
+        <Field label="Miasto (opcjonalnie)" error={errors.contractorCity}>
           <input
             name="contractorCity"
             value={city}
             onChange={(event) => setCity(event.target.value)}
-            className={controlClassName}
+            aria-invalid={Boolean(errors.contractorCity)}
+            className={fieldControlClassName(Boolean(errors.contractorCity))}
           />
         </Field>
       </div>
-      <Field label="Rachunek kontrahenta (opcjonalnie)">
+      <Field label="Rachunek kontrahenta (opcjonalnie)" error={errors.contractorBankAccount}>
         <div className="flex gap-2">
           <input
             name="contractorBankAccount"
@@ -169,7 +178,8 @@ export function ContractorLookupFields({
               setWhitelist(null)
               setWhitelistOk(null)
             }}
-            className={`${controlClassName} min-w-0 flex-1`}
+            aria-invalid={Boolean(errors.contractorBankAccount)}
+            className={`${fieldControlClassName(Boolean(errors.contractorBankAccount))} min-w-0 flex-1`}
           />
           <button
             type="button"

@@ -11,14 +11,13 @@ export function optionalFormString(formData: FormData, key: string) {
   return value === '' ? undefined : value
 }
 
+export function errorMessage(error: unknown) {
+  if (typeof error === 'string') return error
+  if (error instanceof Error) return error.message
+  return 'Nieoczekiwany błąd'
+}
+
 export function redirectWithError(path: string, error: unknown): never {
   if (isRedirectError(error)) throw error
-
-  const message =
-    typeof error === 'string'
-      ? error
-      : error instanceof Error
-        ? error.message
-        : 'Nieoczekiwany błąd'
-  redirect(`${path}?error=${encodeURIComponent(message)}`)
+  redirect(`${path}?error=${encodeURIComponent(errorMessage(error))}`)
 }
