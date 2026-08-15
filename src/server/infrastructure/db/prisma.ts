@@ -21,7 +21,6 @@ export function stripChannelBinding(connectionString: string): string {
   return params.length > 0 ? `${base}?${params.join('&')}` : base
 }
 
-/** Neon serverless driver pools itself; PgBouncer (`-pooler`) is the wrong hop. */
 export function toNeonServerlessUrl(connectionString: string): string {
   return stripChannelBinding(connectionString).replace('-pooler.', '.')
 }
@@ -38,7 +37,6 @@ export function getPrismaConnectUrl(connectionString = getEnv().DATABASE_URL): s
 
 export function getPrisma(): PrismaClient {
   const cached = globalForPrisma.prisma
-  // After `prisma generate`, Turbopack keeps the previous PrismaClient on globalThis.
   if (cached?.categoryKeywordRule) return cached
 
   const connectionString = getPrismaConnectUrl()

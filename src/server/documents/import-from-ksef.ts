@@ -4,12 +4,14 @@ import {
   subjectTypeForKind,
 } from '@/server/infrastructure/ksef/client'
 import { KsefError } from '@/server/infrastructure/ksef/errors'
+import {
+  KSEF_DEMO_INVOICE_LIMIT,
+  KSEF_MAX_DATE_RANGE_DAYS,
+} from '@/server/infrastructure/ksef/limits'
 
 import { DocumentError } from './errors'
 import { ingestFaXmlDocument } from './ingest-fa-xml'
 import type { ImportFromKsefInput } from './schemas'
-
-const MAX_INVOICES_PER_RUN = 50
 
 function daysInclusive(from: Date, to: Date): number {
   return Math.floor((to.getTime() - from.getTime()) / (24 * 60 * 60 * 1000)) + 1
@@ -23,7 +25,7 @@ export async function importFromKsef(
     throw new DocumentError('Zakres dat jest nieprawidłowy (od > do)', 400)
   }
 
-  if (daysInclusive(input.rangeFrom, input.rangeTo) > 93) {
+  if (daysInclusive(input.rangeFrom, input.rangeTo) > KSEF_MAX_DATE_RANGE_DAYS) {
     throw new DocumentError('Maksymalny zakres pobierania to 3 miesiące', 400)
   }
 
@@ -49,18 +51,17 @@ export async function importFromKsef(
       subjectType: subjectTypeForKind(input.invoiceKind),
       from: input.rangeFrom,
       to: input.rangeTo,
+      limit: KSEF_DEMO_INVOICE_LIMIT,
     })
     const metadata = listed.invoices
 
     if (listed.isTruncated) {
       errors.push(
-        'Wynik KSeF był ucięty limitem 10 000 rekordów mimo kontynuacji zakresów dat — lista może być niekompletna. Zawęź zakres lub uruchom import ponownie od ostatniej daty.',
+        `Pobrano maksymalnie ${KSEF_DEMO_INVOICE_LIMIT} faktur albo KSeF uciął listę (isTruncated). Zawęź zakres. Przy dużym wolumenie właściwszy jest POST /invoices/exports — nie ma go w tym demo.`,
       )
     }
 
-    const limited = metadata.slice(0, MAX_INVOICES_PER_RUN)
-
-    for (const invoice of limited) {
+    for (const invoice of metadata) {
       const existing = await prisma.document.findUnique({
         where: { ksefNumber: invoice.ksefNumber },
         select: { id: true },
@@ -93,12 +94,6 @@ export async function importFromKsef(
             : 'Nieznany błąd przy imporcie faktury'
         errors.push(`${invoice.ksefNumber}: ${message}`)
       }
-    }
-
-    if (metadata.length > MAX_INVOICES_PER_RUN) {
-      errors.push(
-        `Znaleziono ${metadata.length} faktur; pobrano maksymalnie ${MAX_INVOICES_PER_RUN} w jednym uruchomieniu`,
-      )
     }
 
     const failed = errors.length > 0 && importedCount === 0 && duplicateCount === 0

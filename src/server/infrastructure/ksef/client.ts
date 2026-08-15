@@ -9,6 +9,7 @@ export type ListInvoicesQuery = {
   subjectType: KsefSubjectType
   from: Date
   to: Date
+  limit?: number
 }
 
 export type ListInvoicesResult = {

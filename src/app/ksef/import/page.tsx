@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { Card, Field, PageShell, buttonClassName, buttonSecondaryClassName, controlClassName } from '@/components/ui-kit'
 import { first } from '@/lib/search-params'
 import { importFromKsefAction } from '@/server/documents/actions'
+import { KSEF_DEMO_INVOICE_LIMIT } from '@/server/infrastructure/ksef/limits'
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>
 
@@ -38,7 +39,7 @@ export default async function KsefImportPage({ searchParams }: { searchParams: S
   return (
     <PageShell
       title="Pobieranie z KSeF"
-      description="Faktury kosztowe lub sprzedażowe z zakresu dat trafiają do bufora. Duplikaty (ten sam numer KSeF) są pomijane."
+      description={`Do bufora schodzi najwyżej ${KSEF_DEMO_INVOICE_LIMIT} faktur na run (query metadata, małe zakresy). Na wdrożeniu ustaw KSEF_CLIENT=http. Duplikaty (ten sam numer KSeF) są pomijane.`}
       flash={flash}
       actions={
         <Link href="/ksef/schedule" className={buttonSecondaryClassName}>

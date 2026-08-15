@@ -2,13 +2,13 @@ import { authenticateWithKsefToken } from './authenticator'
 import type { KsefInvoiceClient, ListInvoicesQuery, ListInvoicesResult } from './client'
 import { getKsefCredentials } from './config'
 import { ksefFetch, ksefFetchXml } from './http'
+import { KSEF_MAX_DATE_WINDOWS } from './limits'
 import {
   queryInvoicesMetadataResponseSchema,
   type InvoiceMetadata,
 } from './schemas'
 
 const PAGE_SIZE = 100
-const MAX_DATE_WINDOWS = 20
 
 function dayStartIso(date: Date): string {
   return `${date.toISOString().slice(0, 10)}T00:00:00.000Z`
@@ -32,7 +32,7 @@ export async function createHttpKsefInvoiceClient(): Promise<KsefInvoiceClient> 
       const seen = new Set<string>()
       let unfinishedTruncation = false
 
-      for (let window = 0; window < MAX_DATE_WINDOWS; window += 1) {
+      for (let window = 0; window < KSEF_MAX_DATE_WINDOWS; window += 1) {
         let pageOffset = 0
         let windowTruncated = false
         let lastIssueDate: string | undefined
@@ -58,9 +58,16 @@ export async function createHttpKsefInvoiceClient(): Promise<KsefInvoiceClient> 
 
           for (const invoice of page.invoices) {
             if (seen.has(invoice.ksefNumber)) continue
+            if (query.limit && invoices.length >= query.limit) {
+              return { invoices, isTruncated: true }
+            }
             seen.add(invoice.ksefNumber)
             invoices.push(invoice)
             lastIssueDate = invoice.issueDate
+          }
+
+          if (query.limit && invoices.length >= query.limit) {
+            return { invoices, isTruncated: page.hasMore || page.isTruncated }
           }
 
           if (!page.hasMore) {
@@ -93,7 +100,7 @@ export async function createHttpKsefInvoiceClient(): Promise<KsefInvoiceClient> 
         }
 
         rangeFrom = nextFrom
-        unfinishedTruncation = window === MAX_DATE_WINDOWS - 1
+        unfinishedTruncation = window === KSEF_MAX_DATE_WINDOWS - 1
       }
 
       return {

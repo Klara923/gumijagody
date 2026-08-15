@@ -1,0 +1,7 @@
+export const KSEF_QUERY_METADATA_PER_HOUR = 20
+
+export const KSEF_MAX_DATE_RANGE_DAYS = 93
+
+export const KSEF_DEMO_INVOICE_LIMIT = 50
+
+export const KSEF_MAX_DATE_WINDOWS = 3

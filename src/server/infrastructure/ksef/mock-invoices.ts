@@ -113,6 +113,10 @@ export function createMockKsefInvoiceClient(): KsefInvoiceClient {
         })
         .map((sample) => sample.metadata)
 
+      if (query.limit && invoices.length > query.limit) {
+        return { invoices: invoices.slice(0, query.limit), isTruncated: true }
+      }
+
       return { invoices, isTruncated: false }
     },
 

@@ -1,10 +1,19 @@
 import type { z } from 'zod'
 
 import { KsefError } from './errors'
+import { KSEF_QUERY_METADATA_PER_HOUR } from './limits'
 
 const DEFAULT_TIMEOUT_MS = 30_000
+const MAX_RETRY_AFTER_MS = 5_000
+const DEFAULT_RETRY_AFTER_MS = 1_000
 
 const MAX_DETAIL_LENGTH = 500
+
+export function retryAfterDelayMs(header: string | null): number {
+  const seconds = Number.parseInt(header ?? '', 10)
+  if (!Number.isFinite(seconds) || seconds < 1) return DEFAULT_RETRY_AFTER_MS
+  return Math.min(seconds * 1000, MAX_RETRY_AFTER_MS)
+}
 
 export type KsefRequest<S extends z.ZodType> = {
   schema: S
@@ -18,6 +27,50 @@ export type KsefRequest<S extends z.ZodType> = {
 const truncate = (text: string) =>
   text.length > MAX_DETAIL_LENGTH ? `${text.slice(0, MAX_DETAIL_LENGTH)}… (ucięto)` : text
 
+async function sendKsefRequest(
+  url: string,
+  init: RequestInit,
+  options: { method: string; path: string; timeoutMs: number; signal?: AbortSignal },
+): Promise<Response> {
+  const run = async () => {
+    const timeout = AbortSignal.timeout(options.timeoutMs)
+    const combined = options.signal ? AbortSignal.any([options.signal, timeout]) : timeout
+    try {
+      return await fetch(url, { ...init, signal: combined })
+    } catch (cause) {
+      if (options.signal?.aborted) throw cause
+      if (timeout.aborted) {
+        throw new KsefError(
+          `KSeF nie odpowiedział w ciągu ${options.timeoutMs} ms (${options.method} ${options.path})`,
+          { cause },
+        )
+      }
+      throw new KsefError(`Nie udało się połączyć z KSeF (${options.method} ${options.path})`, {
+        cause,
+      })
+    }
+  }
+
+  let response = await run()
+  if (response.status === 429) {
+    await new Promise((resolve) =>
+      setTimeout(resolve, retryAfterDelayMs(response.headers.get('Retry-After'))),
+    )
+    response = await run()
+  }
+  return response
+}
+
+function rateLimitError(method: string, path: string, raw: string): KsefError {
+  return new KsefError(
+    `${method} ${path} odrzucone (HTTP 429). Query metadata ma ${KSEF_QUERY_METADATA_PER_HOUR} wywołań/h — zawęź zakres albo spróbuj później.`,
+    {
+      httpStatus: 429,
+      details: raw ? [truncate(raw)] : undefined,
+    },
+  )
+}
+
 export async function ksefFetch<S extends z.ZodType>(
   baseUrl: string,
   path: string,
@@ -25,34 +78,23 @@ export async function ksefFetch<S extends z.ZodType>(
 ): Promise<z.infer<S>> {
   const { schema, method = 'GET', body, bearer, signal, timeoutMs = DEFAULT_TIMEOUT_MS } = request
 
-  const timeout = AbortSignal.timeout(timeoutMs)
-  const combined = signal ? AbortSignal.any([signal, timeout]) : timeout
-
-  let response: Response
-  let raw: string
-  try {
-    response = await fetch(`${baseUrl}${path}`, {
+  const response = await sendKsefRequest(
+    `${baseUrl}${path}`,
+    {
       method,
       body: body === undefined ? undefined : JSON.stringify(body),
-      signal: combined,
       headers: {
         Accept: 'application/json',
         'X-Error-Format': 'problem-details',
         ...(body === undefined ? {} : { 'Content-Type': 'application/json' }),
         ...(bearer ? { Authorization: `Bearer ${bearer}` } : {}),
       },
-    })
-    raw = await response.text()
-  } catch (cause) {
-    if (signal?.aborted) throw cause
+    },
+    { method, path, timeoutMs, signal },
+  )
+  const raw = await response.text()
 
-    if (timeout.aborted) {
-      throw new KsefError(`KSeF nie odpowiedział w ciągu ${timeoutMs} ms (${method} ${path})`, {
-        cause,
-      })
-    }
-    throw new KsefError(`Nie udało się połączyć z KSeF (${method} ${path})`, { cause })
-  }
+  if (response.status === 429) throw rateLimitError(method, path, raw)
 
   if (!response.ok) {
     throw new KsefError(`${method} ${path} zakończone kodem HTTP ${response.status}`, {
@@ -99,30 +141,22 @@ export async function ksefFetchXml(
   },
 ): Promise<Buffer> {
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS
-  const timeout = AbortSignal.timeout(timeoutMs)
-  const combined = options.signal ? AbortSignal.any([options.signal, timeout]) : timeout
-
-  let response: Response
-  let bytes: ArrayBuffer
-  try {
-    response = await fetch(`${baseUrl}${path}`, {
+  const response = await sendKsefRequest(
+    `${baseUrl}${path}`,
+    {
       method: 'GET',
-      signal: combined,
       headers: {
         Accept: 'application/xml',
         'X-Error-Format': 'problem-details',
         Authorization: `Bearer ${options.bearer}`,
       },
-    })
-    bytes = await response.arrayBuffer()
-  } catch (cause) {
-    if (options.signal?.aborted) throw cause
-    if (timeout.aborted) {
-      throw new KsefError(`KSeF nie odpowiedział w ciągu ${timeoutMs} ms (GET ${path})`, {
-        cause,
-      })
-    }
-    throw new KsefError(`Nie udało się połączyć z KSeF (GET ${path})`, { cause })
+    },
+    { method: 'GET', path, timeoutMs, signal: options.signal },
+  )
+  const bytes = await response.arrayBuffer()
+
+  if (response.status === 429) {
+    throw rateLimitError('GET', path, Buffer.from(bytes).toString('utf8'))
   }
 
   if (!response.ok) {
