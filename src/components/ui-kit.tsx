@@ -131,17 +131,20 @@ export function Alert({
 export function Field({
   label,
   hint,
+  error,
   children,
 }: {
   label: string
   hint?: string
+  error?: string
   children: ReactNode
 }) {
   return (
     <label className="grid gap-1 text-sm text-foreground">
       <span className="font-medium">{label}</span>
       {children}
-      {hint ? <span className="text-xs text-muted-foreground">{hint}</span> : null}
+      {error ? <span className="text-xs text-destructive">{error}</span> : null}
+      {!error && hint ? <span className="text-xs text-muted-foreground">{hint}</span> : null}
     </label>
   )
 }
