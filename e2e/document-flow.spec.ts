@@ -65,7 +65,7 @@ test('manual document is in the register and preview shows form data', async ({ 
   await expect(page.getByText(/100(?:\.00)? \/ 23(?:\.00)? \/ 123(?:\.00)? PLN/)).toBeVisible()
 })
 
-test('uploaded FA XML lands in the buffer and preview is not raw XML', async ({ page }) => {
+test('uploaded FA XML goes through buffer, accept, register, and structured preview', async ({ page }) => {
   const number = `FK-E2E-${Date.now()}`
   await signIn(page)
 
@@ -81,14 +81,34 @@ test('uploaded FA XML lands in the buffer and preview is not raw XML', async ({ 
     )
   }
 
-  const row = page.locator('tbody tr', { hasText: number })
-  await expect(row).toBeVisible()
+  const bufferRow = page.locator('tbody tr', { hasText: number })
+  await expect(bufferRow).toBeVisible()
 
-  const preview = await row.getByRole('link', { name: 'Podgląd' }).getAttribute('href')
-  expect(preview).toBeTruthy()
-  await page.goto(preview!)
+  const bufferPreview = await bufferRow.getByRole('link', { name: 'Podgląd' }).getAttribute('href')
+  expect(bufferPreview).toBeTruthy()
+  await page.goto(bufferPreview!)
   await expect(page.getByRole('heading', { name: 'Dane z XML KSeF' })).toBeVisible()
   await expect(page.getByText('ABC AGD sp. z o. o.', { exact: true })).toBeVisible()
   await expect(page.locator('body')).not.toContainText('<?xml')
   await expect(page.locator('body')).not.toContainText('<Faktura')
+
+  await page.goto('/buffer')
+  const row = page.locator('tbody tr', { hasText: number })
+  await row.locator('input[name="ids"]').check()
+  await page.locator('form#buffer-accept').evaluate((form) => {
+    (form as HTMLFormElement).requestSubmit()
+  })
+  await page.waitForURL(/\/buffer\?accepted=/)
+  await expect(page.getByText('Zaakceptowano wybrane dokumenty.')).toBeVisible()
+  await expect(page.locator('tbody tr', { hasText: number })).toHaveCount(0)
+
+  await page.goto('/documents')
+  const registerRow = page.locator('tbody tr', { hasText: number })
+  await expect(registerRow).toBeVisible()
+  const registerPreview = await registerRow.getByRole('link', { name: 'Podgląd' }).getAttribute('href')
+  expect(registerPreview).toBeTruthy()
+  await page.goto(registerPreview!)
+  await expect(page.getByRole('heading', { name: `Podgląd: ${number}` })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Dane z XML KSeF' })).toBeVisible()
+  await expect(page.getByText('ABC AGD sp. z o. o.', { exact: true })).toBeVisible()
 })
