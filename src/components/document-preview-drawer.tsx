@@ -38,7 +38,11 @@ export function PreviewButton({
         Podgląd
       </a>
       {open ? (
-        <DocumentPreviewDrawer documentId={documentId} onClose={() => setOpen(false)} />
+        <DocumentPreviewDrawer
+          key={documentId}
+          documentId={documentId}
+          onClose={() => setOpen(false)}
+        />
       ) : null}
     </>
   )
@@ -61,7 +65,6 @@ function DocumentPreviewDrawer({
 
   useEffect(() => {
     let cancelled = false
-    setState({ status: 'loading' })
     void loadDocumentPreviewAction(documentId).then((result) => {
       if (cancelled) return
       if (result.ok) setState({ status: 'ready', preview: result.preview })

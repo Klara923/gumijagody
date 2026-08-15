@@ -1,4 +1,4 @@
-import { DOCUMENT_SOURCE, documentSourceLabel } from '@/lib/labels'
+import { documentSourceLabel, type DocumentSource } from '@/lib/labels'
 
 export type RegisterDocument = {
   id: string
@@ -12,7 +12,7 @@ export type RegisterDocument = {
   vatAmount: string
   grossAmount: string
   currency: string
-  source: keyof typeof DOCUMENT_SOURCE
+  source: DocumentSource
   ksefNumber: string | null
 }
 

@@ -51,6 +51,8 @@ export function documentSourceLabel(value: keyof typeof DOCUMENT_SOURCE) {
   return pick(DOCUMENT_SOURCE, value).label
 }
 
+export type DocumentSource = keyof typeof DOCUMENT_SOURCE
+
 export function importStatusLabel(value: keyof typeof IMPORT_STATUS) {
   return pick(IMPORT_STATUS, value).label
 }

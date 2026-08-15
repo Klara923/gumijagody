@@ -135,7 +135,7 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Se
               className={controlClassName}
             />
           </Field>
-          <Field label="Kierunek">
+          <Field label="Kolejność">
             <select name="sortOrder" defaultValue={first(params.sortOrder) ?? 'desc'} className={controlClassName}>
               <option value="desc">Malejąco</option>
               <option value="asc">Rosnąco</option>

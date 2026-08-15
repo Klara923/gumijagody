@@ -36,6 +36,7 @@ const eslintConfig = defineConfig([
     'next-env.d.ts',
     'src/generated/**',
     '.backup/**',
+    'jest.config.cjs',
   ]),
 ])
 
