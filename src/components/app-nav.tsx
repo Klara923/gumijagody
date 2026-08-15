@@ -51,7 +51,7 @@ function NavLinks({
             key={link.href}
             href={link.href}
             className={cn(
-              'shrink-0 rounded-md px-2.5 py-1.5 text-sm transition-colors',
+              'shrink-0 cursor-pointer rounded-md px-2.5 py-1.5 text-sm transition-colors',
               active
                 ? 'bg-primary text-primary-foreground'
                 : 'text-muted-foreground hover:bg-muted hover:text-foreground',
@@ -73,7 +73,7 @@ export function AppNav({ showLogout = false }: { showLogout?: boolean }) {
   return (
     <header className="sticky top-0 z-20 h-14 border-b border-border bg-card/90 backdrop-blur">
       <div className="mx-auto flex h-full max-w-5xl items-center gap-3 px-4">
-        <Link href="/" className="shrink-0 text-sm font-semibold tracking-tight text-foreground">
+        <Link href="/" className="shrink-0 cursor-pointer text-sm font-semibold tracking-tight text-foreground">
           {APP_NAME}
         </Link>
         <nav className="flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -89,7 +89,7 @@ export function AppNav({ showLogout = false }: { showLogout?: boolean }) {
           <form action={logoutAction}>
             <button
               type="submit"
-              className="shrink-0 rounded-md px-2.5 py-1.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+              className="shrink-0 cursor-pointer rounded-md px-2.5 py-1.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
             >
               Wyloguj
             </button>

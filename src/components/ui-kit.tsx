@@ -150,16 +150,16 @@ export const controlClassName =
   'h-9 w-full min-w-0 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30'
 
 export const buttonClassName =
-  'inline-flex h-9 shrink-0 items-center justify-center rounded-md bg-primary px-3.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50'
+  'inline-flex h-9 shrink-0 cursor-pointer items-center justify-center rounded-md bg-primary px-3.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50'
 
 export const buttonSecondaryClassName =
-  'inline-flex h-9 shrink-0 items-center justify-center rounded-md border border-border bg-background px-3.5 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-50'
+  'inline-flex h-9 shrink-0 cursor-pointer items-center justify-center rounded-md border border-border bg-background px-3.5 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50'
 
 export const buttonDestructiveClassName =
-  'inline-flex h-9 shrink-0 items-center justify-center rounded-md border border-destructive/20 bg-destructive/10 px-3.5 text-sm font-medium text-destructive transition-colors hover:bg-destructive/15'
+  'inline-flex h-9 shrink-0 cursor-pointer items-center justify-center rounded-md border border-destructive/20 bg-destructive/10 px-3.5 text-sm font-medium text-destructive transition-colors hover:bg-destructive/15 disabled:cursor-not-allowed disabled:opacity-50'
 
 export const textLinkClassName =
-  'text-sm font-medium text-foreground underline-offset-4 hover:underline'
+  'cursor-pointer text-sm font-medium text-foreground underline-offset-4 hover:underline'
 
 export const tableClassName = 'w-full min-w-[40rem] table-fixed border-collapse text-left text-sm'
 

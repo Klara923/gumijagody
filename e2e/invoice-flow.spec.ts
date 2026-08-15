@@ -43,6 +43,7 @@ test('upload FA XML to buffer, accept into register, preview is structured', asy
   await expect(page.getByText(invoiceNumber)).toBeVisible()
   await page.locator('tr', { hasText: invoiceNumber }).locator('input[name="ids"]').check()
   await page.getByRole('button', { name: 'Akceptuj zaznaczone' }).click()
+  await page.getByRole('dialog').getByRole('button', { name: 'Akceptuj' }).click()
   await page.waitForURL(/\/buffer/)
 
   await page.goto('/documents')

@@ -35,7 +35,7 @@ export function Flash({
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="shrink-0 text-current/70 hover:text-current"
+          className="shrink-0 cursor-pointer text-current/70 hover:text-current"
           aria-label="Zamknij komunikat"
         >
           ×

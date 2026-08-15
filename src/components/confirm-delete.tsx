@@ -13,6 +13,7 @@ type ConfirmDeleteProps = {
   label?: string
   title: string
   description?: string
+  className?: string
 }
 
 export function ConfirmDelete({
@@ -21,6 +22,7 @@ export function ConfirmDelete({
   label = 'Usuń',
   title,
   description,
+  className = buttonDestructiveClassName,
 }: ConfirmDeleteProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const titleId = useId()
@@ -30,7 +32,7 @@ export function ConfirmDelete({
     <>
       <button
         type="button"
-        className={buttonDestructiveClassName}
+        className={className}
         onClick={() => dialogRef.current?.showModal()}
       >
         {label}

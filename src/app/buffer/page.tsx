@@ -1,5 +1,6 @@
 import Link from 'next/link'
 
+import { ConfirmAccept } from '@/components/confirm-accept'
 import { PreviewButton } from '@/components/document-preview-drawer'
 import { ListPagination } from '@/components/list-pagination'
 import { SelectAllCheckbox } from '@/components/select-all-checkbox'
@@ -82,7 +83,7 @@ export default async function BufferPage({ searchParams }: { searchParams: Searc
         </EmptyState>
       ) : (
         <div className="space-y-4">
-          <form action={acceptDocumentsAction} className="space-y-4">
+          <form id="buffer-accept" action={acceptDocumentsAction} className="space-y-4">
             <Card className="overflow-x-auto p-0">
               <table className={tableClassName}>
                 <thead>
@@ -128,9 +129,7 @@ export default async function BufferPage({ searchParams }: { searchParams: Searc
                 </tbody>
               </table>
             </Card>
-            <button type="submit" className={buttonClassName}>
-              Akceptuj zaznaczone
-            </button>
+            <ConfirmAccept form="buffer-accept" />
           </form>
           <ListPagination
             pathname="/buffer"

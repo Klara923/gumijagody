@@ -1,3 +1,4 @@
+import { CategoryTree } from '@/components/category-tree'
 import { ConfirmDelete } from '@/components/confirm-delete'
 import {
   Card,
@@ -12,44 +13,13 @@ import { first } from '@/lib/search-params'
 import {
   createCategoryAction,
   createKeywordRuleAction,
-  deleteCategoryAction,
   deleteKeywordRuleAction,
-  updateCategoryAction,
   updateKeywordRuleAction,
 } from '@/server/categories/actions'
 import { listCategoryOptions, listCategoryTree } from '@/server/categories/list-categories'
-import type { CategoryNode } from '@/server/categories/list-categories'
 import { listKeywordRules } from '@/server/categories/list-keyword-rules'
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>
-
-function CategoryBranch({ nodes, depth = 0 }: { nodes: CategoryNode[]; depth?: number }) {
-  return (
-    <ul className={depth === 0 ? 'space-y-3' : 'mt-2 space-y-2 border-l border-border pl-4'}>
-      {nodes.map((node) => (
-        <li key={node.id} className="rounded-md bg-muted/60 p-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <strong className="text-sm text-foreground">{node.name}</strong>
-            <form action={updateCategoryAction} className="flex flex-wrap items-center gap-2">
-              <input type="hidden" name="id" value={node.id} />
-              <input name="name" defaultValue={node.name} required className={controlClassName} />
-              <button type="submit" className={buttonSecondaryClassName}>
-                Zmień nazwę
-              </button>
-            </form>
-            <ConfirmDelete
-              action={deleteCategoryAction}
-              fields={{ id: node.id }}
-              title={`Usunąć kategorię „${node.name}”?`}
-              description="Nie usuniesz kategorii, która ma podkategorie albo przypisane dokumenty."
-            />
-          </div>
-          {node.children.length > 0 && <CategoryBranch nodes={node.children} depth={depth + 1} />}
-        </li>
-      ))}
-    </ul>
-  )
-}
 
 export default async function CategoriesPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams
@@ -210,11 +180,7 @@ export default async function CategoriesPage({ searchParams }: { searchParams: S
 
       <Card>
         <CardTitle>Drzewo</CardTitle>
-        {tree.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Brak kategorii.</p>
-        ) : (
-          <CategoryBranch nodes={tree} />
-        )}
+        <CategoryTree nodes={tree} />
       </Card>
     </PageShell>
   )
