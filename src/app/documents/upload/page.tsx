@@ -1,4 +1,5 @@
 import { ContractorLookupFields } from '@/components/contractor-lookup-fields'
+import { FileDropField } from '@/components/file-drop-field'
 import { Card, Field, PageShell, buttonClassName, controlClassName } from '@/components/ui-kit'
 import { first } from '@/lib/search-params'
 import { listDocumentTypes } from '@/server/document-types/list-document-types'
@@ -23,15 +24,7 @@ export default async function UploadDocumentPage({
     >
       <Card className="max-w-2xl">
         <form action={uploadDocumentAction} className="grid gap-4">
-          <Field label="Plik (PDF lub XML)">
-            <input
-              type="file"
-              name="file"
-              accept=".pdf,.xml,application/pdf,application/xml,text/xml"
-              required
-              className={`${controlClassName} h-auto min-h-9 py-1.5`}
-            />
-          </Field>
+          <FileDropField />
 
           <fieldset className="grid gap-3 rounded-lg border border-border p-3">
             <legend className="px-1 text-sm font-medium text-foreground">Metadane (wymagane dla PDF)</legend>

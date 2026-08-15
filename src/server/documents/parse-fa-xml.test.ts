@@ -42,6 +42,25 @@ describe('parseFaXml', () => {
     )
   })
 
+  it.each([
+    ['FA2-05.xml', 'FK/TEST/2026/005', '246.00'],
+    ['FA2-06.xml', 'FK/TEST/2026/006', '430.50'],
+    ['FA2-07.xml', 'FK/TEST/2026/007', '98.40'],
+    ['FA2-08.xml', 'FK/TEST/2026/008', '787.20'],
+    ['FA3-05.xml', 'FV/TEST/2026/105', '504.30'],
+    ['FA3-06.xml', 'FV/TEST/2026/106', '639.60'],
+    ['FA3-07.xml', 'FV/TEST/2026/107', '226.50'],
+    ['FA3-08.xml', 'FV/TEST/2026/108', '1082.40'],
+  ])('reads upload fixture %s', (name, number, gross) => {
+    const invoice = parseFaXml(fixture(name))
+
+    expect(invoice.number).toBe(number)
+    expect(invoice.grossAmount).toBe(gross)
+    expect(invoice.buyer.nip).toBe('4728391059')
+    expect(invoice.seller.nip).toBeDefined()
+    expect(invoice.lines.length).toBeGreaterThan(0)
+  })
+
   it('throws DocumentError for XML that is not a FA invoice', () => {
     expect(() => parseFaXml('<root/>')).toThrow(DocumentError)
     expect(() => parseFaXml('<root/>')).toThrow('Nie rozpoznano faktury FA(2)/FA(3)')
