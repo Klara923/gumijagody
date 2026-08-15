@@ -66,6 +66,14 @@ export default async function UploadDocumentPage({
             <Field label="Waluta">
               <input name="currency" defaultValue="PLN" className={`${controlClassName} max-w-32`} />
             </Field>
+            <Field label="Rachunek do zapłaty (opcjonalnie)" hint="NRB (26 cyfr) albo IBAN. Przy XML brany z pliku.">
+              <input
+                name="paymentAccount"
+                autoComplete="off"
+                placeholder="PL61 1090 1014 0000 0712 1981 2874"
+                className={controlClassName}
+              />
+            </Field>
           </fieldset>
 
           <div>

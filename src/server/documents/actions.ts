@@ -71,7 +71,10 @@ export async function updateDocumentAction(formData: FormData) {
     vatAmount: optionalFormString(formData, 'vatAmount'),
     grossAmount: optionalFormString(formData, 'grossAmount'),
     currency: optionalFormString(formData, 'currency'),
-    paymentAccount: optionalFormString(formData, 'paymentAccount'),
+    paymentAccount:
+      formData.get('paymentAccount') === ''
+        ? null
+        : optionalFormString(formData, 'paymentAccount'),
     categoryId:
       formData.get('categoryId') === ''
         ? null

@@ -90,6 +90,7 @@ export default async function DocumentDetailPage({
             Netto / VAT / Brutto: {document.netAmount} / {document.vatAmount} / {document.grossAmount}{' '}
             {document.currency}
           </p>
+          <p>Rachunek do zapłaty: {document.paymentAccount ?? '—'}</p>
           <p>Kategoria: {document.category?.name ?? '—'}</p>
           <form action={assignDocumentCategoryAction} className="flex flex-wrap gap-2 pt-2">
             <input type="hidden" name="id" value={document.id} />
@@ -171,6 +172,15 @@ export default async function DocumentDetailPage({
             </Field>
             <Field label="Waluta">
               <input name="currency" defaultValue={document.currency} className={controlClassName} />
+            </Field>
+            <Field label="Rachunek do zapłaty (opcjonalnie)" hint="NRB (26 cyfr) albo IBAN. Puste pole kasuje rachunek.">
+              <input
+                name="paymentAccount"
+                defaultValue={document.paymentAccount ?? ''}
+                autoComplete="off"
+                placeholder="PL61 1090 1014 0000 0712 1981 2874"
+                className={controlClassName}
+              />
             </Field>
             <button type="submit" className={buttonClassName}>
               Zapisz zmiany
