@@ -28,7 +28,7 @@ function assignFile(input: HTMLInputElement, file: File | null) {
   input.files = transfer.files
 }
 
-export function FileDropField() {
+export function FileDropField({ error: serverError }: { error?: string }) {
   const inputId = useId()
   const hintId = useId()
   const inputRef = useRef<HTMLInputElement>(null)
@@ -47,6 +47,8 @@ export function FileDropField() {
     setFileName(file?.name ?? null)
     setError(null)
   }
+
+  const shownError = error ?? serverError
 
   return (
     <div className="grid gap-1 text-sm text-foreground">
@@ -80,9 +82,14 @@ export function FileDropField() {
           setDragging(false)
           applyFile(event.dataTransfer.files[0] ?? null)
         }}
+        aria-invalid={Boolean(shownError)}
         className={cn(
           'rounded-lg border border-dashed p-4 transition-colors',
-          dragging ? 'border-ring bg-muted/70' : 'border-border bg-muted/20',
+          shownError
+            ? 'border-destructive bg-destructive/5'
+            : dragging
+              ? 'border-ring bg-muted/70'
+              : 'border-border bg-muted/20',
         )}
       >
         {fileName ? (
@@ -118,14 +125,16 @@ export function FileDropField() {
           </div>
         )}
       </div>
-      <p id={hintId} className="text-xs text-muted-foreground">
-        {fileName
-          ? 'Podmień wybiera inny plik. Możesz też upuścić nowy w to pole.'
-          : 'Możesz też upuścić plik w to pole. PDF albo XML FA(2)/FA(3).'}
-      </p>
-      {error ? (
-        <p className="text-sm text-red-700" role="alert">
-          {error}
+      {!shownError ? (
+        <p id={hintId} className="text-xs text-muted-foreground">
+          {fileName
+            ? 'Podmień wybiera inny plik. Możesz też upuścić nowy w to pole.'
+            : 'Możesz też upuścić plik w to pole. PDF albo XML FA(2)/FA(3).'}
+        </p>
+      ) : null}
+      {shownError ? (
+        <p className="text-xs text-destructive" role="alert">
+          {shownError}
         </p>
       ) : null}
     </div>

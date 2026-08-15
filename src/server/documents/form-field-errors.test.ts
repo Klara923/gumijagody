@@ -32,6 +32,15 @@ describe('fieldErrorsFromCaught', () => {
       number: 'Dokument o numerze "FV/1" dla tego kontrahenta już istnieje',
     })
   })
+
+  it('puts upload and XML parse errors on the file field', () => {
+    expect(fieldErrorsFromCaught('Ten plik został już wgrany wcześniej')).toEqual({
+      file: 'Ten plik został już wgrany wcześniej',
+    })
+    expect(fieldErrorsFromCaught('Brak numeru faktury (P_2) w XML')).toEqual({
+      file: 'Brak numeru faktury (P_2) w XML',
+    })
+  })
 })
 
 describe('valuesFromFormData', () => {

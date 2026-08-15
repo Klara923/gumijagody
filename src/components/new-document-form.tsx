@@ -4,12 +4,9 @@ import { useActionState } from 'react'
 
 import { ContractorLookupFields } from '@/components/contractor-lookup-fields'
 import { Field, buttonClassName, fieldControlClassName } from '@/components/ui-kit'
-import {
-  createDocumentAction,
-  type CreateDocumentFormState,
-} from '@/server/documents/actions'
+import { createDocumentAction, type DocumentFormState } from '@/server/documents/actions'
 
-const initialState: CreateDocumentFormState = { errors: {}, values: {}, attempt: 0 }
+const initialState: DocumentFormState = { errors: {}, values: {}, attempt: 0 }
 
 export function NewDocumentForm({
   types,

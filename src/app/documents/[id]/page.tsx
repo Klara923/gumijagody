@@ -2,10 +2,10 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 import { ConfirmDelete } from '@/components/confirm-delete'
+import { EditDocumentForm } from '@/components/edit-document-form'
 import {
   Card,
   EnumBadge,
-  Field,
   PageShell,
   buttonClassName,
   buttonSecondaryClassName,
@@ -15,11 +15,7 @@ import { DOCUMENT_SOURCE, DOCUMENT_STAGE } from '@/lib/labels'
 import { first } from '@/lib/search-params'
 import { listCategoryOptions } from '@/server/categories/list-categories'
 import { listDocumentTypes } from '@/server/document-types/list-document-types'
-import {
-  assignDocumentCategoryAction,
-  deleteDocumentAction,
-  updateDocumentAction,
-} from '@/server/documents/actions'
+import { assignDocumentCategoryAction, deleteDocumentAction } from '@/server/documents/actions'
 import { DocumentError } from '@/server/documents/errors'
 import { getDocumentById } from '@/server/documents/get-document'
 import { MUTABLE_DOCUMENT_SOURCES } from '@/server/documents/policy'
@@ -61,7 +57,7 @@ export default async function DocumentDetailPage({
           <EnumBadge value={document.source} labels={DOCUMENT_SOURCE} />
         </div>
       }
-      flash={error ? { message: error } : saved ? { tone: 'ok', message: 'Zapisano.' } : null}
+      flash={saved ? { tone: 'ok', message: 'Zapisano.' } : error ? { message: error } : null}
       actions={
         <>
           <Link href={backHref} className={buttonSecondaryClassName}>
@@ -110,82 +106,7 @@ export default async function DocumentDetailPage({
       ) : (
         <>
           <Card>
-          <form action={updateDocumentAction} className="grid gap-3">
-            <input type="hidden" name="id" value={document.id} />
-            <input type="hidden" name="contractorId" value={document.contractor.id} />
-            <Field label="Numer">
-              <input name="number" defaultValue={document.number} required className={controlClassName} />
-            </Field>
-            <Field label="Typ">
-              <select name="typeId" defaultValue={document.type.id} required className={controlClassName}>
-                {types.map((type) => (
-                  <option key={type.id} value={type.id}>
-                    {type.label}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <p className="text-sm text-muted-foreground">
-              Kontrahent: {document.contractor.name}
-              {document.contractor.nip ? ` (${document.contractor.nip})` : ''}
-            </p>
-            <Field label="Kategoria">
-              <select name="categoryId" defaultValue={document.category?.id ?? ''} className={controlClassName}>
-                <option value="">— brak —</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.label}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label="Data wystawienia">
-              <input
-                type="date"
-                name="issueDate"
-                defaultValue={document.issueDate}
-                required
-                className={controlClassName}
-              />
-            </Field>
-            <Field label="Termin płatności">
-              <input
-                type="date"
-                name="dueDate"
-                defaultValue={document.dueDate ?? ''}
-                className={controlClassName}
-              />
-            </Field>
-            <Field label="Netto">
-              <input name="netAmount" defaultValue={document.netAmount} required className={controlClassName} />
-            </Field>
-            <Field label="VAT">
-              <input name="vatAmount" defaultValue={document.vatAmount} required className={controlClassName} />
-            </Field>
-            <Field label="Brutto">
-              <input
-                name="grossAmount"
-                defaultValue={document.grossAmount}
-                required
-                className={controlClassName}
-              />
-            </Field>
-            <Field label="Waluta">
-              <input name="currency" defaultValue={document.currency} className={controlClassName} />
-            </Field>
-            <Field label="Rachunek do zapłaty (opcjonalnie)" hint="NRB (26 cyfr) albo IBAN. Puste pole kasuje rachunek.">
-              <input
-                name="paymentAccount"
-                defaultValue={document.paymentAccount ?? ''}
-                autoComplete="off"
-                placeholder="PL61 1090 1014 0000 0712 1981 2874"
-                className={controlClassName}
-              />
-            </Field>
-            <button type="submit" className={buttonClassName}>
-              Zapisz zmiany
-            </button>
-          </form>
+            <EditDocumentForm document={document} types={types} categories={categories} />
           </Card>
 
           <ConfirmDelete

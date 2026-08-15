@@ -17,6 +17,12 @@ export const DOCUMENT_FORM_FIELD_NAMES = [
   'paymentAccount',
 ] as const
 
+export type DocumentFormState = {
+  errors: Record<string, string>
+  values: Record<string, string>
+  attempt: number
+}
+
 export function valuesFromFormData(formData: FormData): Record<string, string> {
   const values: Record<string, string> = {}
   for (const name of DOCUMENT_FORM_FIELD_NAMES) {
@@ -24,6 +30,18 @@ export function valuesFromFormData(formData: FormData): Record<string, string> {
     values[name] = typeof value === 'string' ? value : ''
   }
   return values
+}
+
+export function failedDocumentFormState(
+  prev: DocumentFormState,
+  formData: FormData,
+  errors: Record<string, string>,
+): DocumentFormState {
+  return {
+    errors,
+    values: valuesFromFormData(formData),
+    attempt: (prev.attempt ?? 0) + 1,
+  }
 }
 
 const CONTRACTOR_FORM_FIELDS: Record<string, string> = {
@@ -53,10 +71,11 @@ export function fieldErrorsFromCaught(error: unknown): Record<string, string> {
       : error instanceof Error
         ? error.message
         : 'Nieoczekiwany błąd'
-  if (/numer/i.test(message)) return { number: message }
+  if (/numer/i.test(message) && !/plik|xml/i.test(message)) return { number: message }
   if (/typ dokumentu/i.test(message)) return { typeId: message }
   if (/kategori/i.test(message)) return { categoryId: message }
   if (/rachunk/i.test(message)) return { paymentAccount: message }
+  if (/plik|xml|pdf|wgrany wcześniej|wybierz plik/i.test(message)) return { file: message }
   if (/nip/i.test(message)) return { contractorNip: message }
   if (/kontrahent/i.test(message)) return { contractorName: message }
   if (/brutto|netto|vat/i.test(message)) return { grossAmount: message }

@@ -14,21 +14,19 @@ import {
   createDocumentBodySchema,
   importFromKsefBodySchema,
   updateDocumentBodySchema,
+  uploadPdfMetadataSchema,
 } from '@/server/documents/schemas'
 import {
+  failedDocumentFormState,
   fieldErrorsFromCaught,
   fieldErrorsFromZod,
-  valuesFromFormData,
+  type DocumentFormState,
 } from '@/server/documents/form-field-errors'
 import { updateDocument } from '@/server/documents/update-document'
 import { uploadDocument } from '@/server/documents/upload-document'
 import { formString, optionalFormString, redirectWithError } from '@/server/http/form'
 
-export type CreateDocumentFormState = {
-  errors: Record<string, string>
-  values: Record<string, string>
-  attempt: number
-}
+export type { DocumentFormState }
 
 function contractorFromForm(formData: FormData) {
   return {
@@ -42,9 +40,9 @@ function contractorFromForm(formData: FormData) {
 }
 
 export async function createDocumentAction(
-  _prev: CreateDocumentFormState,
+  _prev: DocumentFormState,
   formData: FormData,
-): Promise<CreateDocumentFormState> {
+): Promise<DocumentFormState> {
   const raw = {
     number: formString(formData, 'number'),
     typeId: formString(formData, 'typeId'),
@@ -61,7 +59,7 @@ export async function createDocumentAction(
 
   const parsed = createDocumentBodySchema.safeParse(raw)
   if (!parsed.success) {
-    return failedCreateDocumentState(_prev, formData, fieldErrorsFromZod(parsed.error))
+    return failedDocumentFormState(_prev, formData, fieldErrorsFromZod(parsed.error))
   }
 
   try {
@@ -71,23 +69,14 @@ export async function createDocumentAction(
     redirect(`/documents/${document.id}`)
   } catch (error) {
     if (isRedirectError(error)) throw error
-    return failedCreateDocumentState(_prev, formData, fieldErrorsFromCaught(error))
+    return failedDocumentFormState(_prev, formData, fieldErrorsFromCaught(error))
   }
 }
 
-function failedCreateDocumentState(
-  prev: CreateDocumentFormState,
+export async function updateDocumentAction(
+  _prev: DocumentFormState,
   formData: FormData,
-  errors: Record<string, string>,
-): CreateDocumentFormState {
-  return {
-    errors,
-    values: valuesFromFormData(formData),
-    attempt: (prev.attempt ?? 0) + 1,
-  }
-}
-
-export async function updateDocumentAction(formData: FormData) {
+): Promise<DocumentFormState> {
   const id = formString(formData, 'id')
   const raw = {
     number: optionalFormString(formData, 'number'),
@@ -111,10 +100,7 @@ export async function updateDocumentAction(formData: FormData) {
 
   const parsed = updateDocumentBodySchema.safeParse(raw)
   if (!parsed.success) {
-    redirectWithError(
-      `/documents/${id}`,
-      parsed.error.issues[0]?.message ?? 'Nieprawidłowe dane',
-    )
+    return failedDocumentFormState(_prev, formData, fieldErrorsFromZod(parsed.error))
   }
 
   try {
@@ -124,7 +110,8 @@ export async function updateDocumentAction(formData: FormData) {
     revalidatePath(`/documents/${id}`)
     redirect(`/documents/${id}?saved=1`)
   } catch (error) {
-    redirectWithError(`/documents/${id}`, error)
+    if (isRedirectError(error)) throw error
+    return failedDocumentFormState(_prev, formData, fieldErrorsFromCaught(error))
   }
 }
 
@@ -179,10 +166,18 @@ export async function acceptDocumentsAction(formData: FormData) {
   }
 }
 
-export async function uploadDocumentAction(formData: FormData) {
+function isXmlUpload(file: File) {
+  const name = file.name.toLowerCase()
+  return name.endsWith('.xml') || file.type === 'application/xml' || file.type === 'text/xml'
+}
+
+export async function uploadDocumentAction(
+  _prev: DocumentFormState,
+  formData: FormData,
+): Promise<DocumentFormState> {
   const fileValue = formData.get('file')
   if (!(fileValue instanceof File) || fileValue.size === 0) {
-    redirectWithError('/documents/upload', 'Wybierz plik PDF lub XML')
+    return failedDocumentFormState(_prev, formData, { file: 'Wybierz plik PDF lub XML' })
   }
 
   const content = Buffer.from(await fileValue.arrayBuffer())
@@ -200,6 +195,13 @@ export async function uploadDocumentAction(formData: FormData) {
     categoryId: optionalFormString(formData, 'categoryId'),
   }
 
+  if (!isXmlUpload(fileValue)) {
+    const parsed = uploadPdfMetadataSchema.safeParse(metadata)
+    if (!parsed.success) {
+      return failedDocumentFormState(_prev, formData, fieldErrorsFromZod(parsed.error))
+    }
+  }
+
   try {
     const document = await uploadDocument(
       {
@@ -213,7 +215,8 @@ export async function uploadDocumentAction(formData: FormData) {
     revalidatePath('/buffer')
     redirect(`/buffer?uploaded=${encodeURIComponent(document.id)}`)
   } catch (error) {
-    redirectWithError('/documents/upload', error)
+    if (isRedirectError(error)) throw error
+    return failedDocumentFormState(_prev, formData, fieldErrorsFromCaught(error))
   }
 }
 
