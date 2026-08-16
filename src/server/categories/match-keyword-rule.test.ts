@@ -1,8 +1,9 @@
 import { matchKeywordCategoryId, normalizeKeyword } from '@/server/categories/match-keyword-rule'
 
 describe('normalizeKeyword', () => {
-  it('trims, lowercases in Polish, and collapses spaces', () => {
-    expect(normalizeKeyword('  ORLEN  S.A.  ')).toBe('orlen s.a.')
+  it('trims, lowercases in Polish, folds diacritics, and collapses punctuation', () => {
+    expect(normalizeKeyword('  ORLEN  S.A.  ')).toBe('orlen s a')
+    expect(normalizeKeyword('Opakowań')).toBe('opakowan')
     expect(normalizeKeyword('Paliwo')).toBe('paliwo')
   })
 })
@@ -43,5 +44,17 @@ describe('matchKeywordCategoryId', () => {
 
   it('returns null when nothing matches', () => {
     expect(matchKeywordCategoryId(['Allegro', 'FV/99'], rules)).toBeNull()
+  })
+
+  it('folds Polish diacritics so Opakowań matches opakowan', () => {
+    expect(matchKeywordCategoryId(['Dostawca Opakowań Sp. z o.o.'], rules)).toBe('packaging')
+  })
+
+  it('matches a contractor name that contains the full keyword', () => {
+    expect(matchKeywordCategoryId(['Euro Transport Sp. z o.o.'], rules)).toBe('transport')
+  })
+
+  it('does not treat Trans-Euro as transport', () => {
+    expect(matchKeywordCategoryId(['Trans-Euro Sp. z o.o.'], rules)).toBeNull()
   })
 })

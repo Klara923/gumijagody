@@ -1,5 +1,13 @@
 export function normalizeKeyword(value: string): string {
-  return value.trim().toLocaleLowerCase('pl').replace(/\s+/g, ' ')
+  return value
+    .trim()
+    .toLocaleLowerCase('pl')
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .replace(/ł/g, 'l')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
 }
 
 export function matchKeywordCategoryId(

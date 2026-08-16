@@ -152,7 +152,7 @@ export async function ingestFaXmlDocument(input: IngestFaXmlInput) {
         grossAmount: parsed.grossAmount,
         currency: parsed.currency,
         paymentAccount: optionalValidAccount(parsed.paymentAccount) ?? null,
-        extraCategoryTexts: parsed.lines.map((line) => line.name),
+        extraCategoryTexts: [counterparty.name, ...parsed.lines.map((line) => line.name)],
         source: input.source,
         stage: 'BUFFER',
         ksefNumber: input.ksefNumber ?? null,
