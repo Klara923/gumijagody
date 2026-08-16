@@ -34,7 +34,7 @@ export default async function KsefSchedulePage() {
   return (
     <PageShell
       title="Harmonogram KSeF"
-      description="Wiele godzin na dobę. Lokalnie node-cron sprawdza minutę. Na Vercel Hobby cron woła raz na dobę — dodatkowe godziny ustawisz przez cron-job.org na POST /api/cron/ksef."
+      description="Wiele godzin na dobę. Lokalnie node-cron sprawdza minutę. Na Vercel Hobby wbudowany cron woła raz na dobę — żeby sloty wstawały, cron-job.org bije POST /api/cron/ksef co minutę; import leci tylko w godzinach poniżej."
       actions={
         <Link href="/ksef/import" className={buttonSecondaryClassName}>
           Ręczny import
