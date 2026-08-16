@@ -178,14 +178,13 @@ model Attachment {
   mimeType  String
   sizeBytes Int
 
-  checksum String
+  checksum String @unique
 
   content Bytes
 
   createdAt DateTime @default(now())
 
   @@index([documentId])
-  @@index([checksum])
 }
 
 model ImportRun {

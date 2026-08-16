@@ -1,8 +1,10 @@
-import { getPrisma } from '@/server/infrastructure/db/prisma'
-
 import { DocumentError } from './errors'
 import { ingestFaXmlDocument, checksumOf } from './ingest-fa-xml'
-import { insertDocumentInTransaction } from './insert-document'
+import {
+  documentFileConflict,
+  findDocumentIdByChecksum,
+  insertDocumentInTransaction,
+} from './insert-document'
 import {
   uploadPdfMetadataSchema,
   type UploadPdfMetadata,
@@ -36,14 +38,9 @@ function isPdfFile(file: UploadFile): boolean {
 }
 
 async function ensureUniqueChecksum(checksum: string) {
-  const existing = await getPrisma().attachment.findFirst({
-    where: { checksum },
-    select: { documentId: true },
-  })
-  if (existing) {
-    throw new DocumentError('Ten plik został już wgrany wcześniej', 409, [
-      existing.documentId,
-    ])
+  const documentId = await findDocumentIdByChecksum(checksum)
+  if (documentId) {
+    throw documentFileConflict(documentId)
   }
 }
 

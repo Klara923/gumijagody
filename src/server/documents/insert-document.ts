@@ -51,6 +51,22 @@ export function documentNumberConflict(number: string) {
   )
 }
 
+export function documentFileConflict(documentId?: string) {
+  return new DocumentError(
+    'Ten plik został już wgrany wcześniej',
+    409,
+    documentId ? [documentId] : undefined,
+  )
+}
+
+export async function findDocumentIdByChecksum(checksum: string) {
+  const existing = await getPrisma().attachment.findFirst({
+    where: { checksum },
+    select: { documentId: true },
+  })
+  return existing?.documentId
+}
+
 export async function insertDocument(tx: Tx, input: InsertDocumentInput) {
   const type = await tx.documentType.findUnique({ where: { id: input.typeId } })
   if (!type) {
@@ -117,6 +133,12 @@ export async function insertDocumentInTransaction(input: InsertDocumentInput) {
     return await getPrisma().$transaction((tx) => insertDocument(tx, input))
   } catch (error) {
     if (error instanceof DocumentError) throw error
+    if (isPrismaUniqueViolation(error, 'checksum')) {
+      const documentId = input.attachment
+        ? await findDocumentIdByChecksum(input.attachment.checksum)
+        : undefined
+      throw documentFileConflict(documentId)
+    }
     if (isPrismaUniqueViolation(error)) {
       throw documentNumberConflict(input.number)
     }

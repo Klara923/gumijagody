@@ -12,7 +12,12 @@ import {
 } from '@/server/validation'
 
 import { DocumentError } from './errors'
-import { documentNumberConflict, insertDocument } from './insert-document'
+import {
+  documentFileConflict,
+  documentNumberConflict,
+  findDocumentIdByChecksum,
+  insertDocument,
+} from './insert-document'
 import { parseFaXml } from './parse-fa-xml'
 
 export function checksumOf(content: Buffer): string {
@@ -75,14 +80,9 @@ export async function ingestFaXmlDocument(input: IngestFaXmlInput) {
   const checksum = checksumOf(content)
 
   if (input.enforceChecksumUniqueness !== false) {
-    const existingAttachment = await getPrisma().attachment.findFirst({
-      where: { checksum },
-      select: { documentId: true },
-    })
-    if (existingAttachment) {
-      throw new DocumentError('Ten plik został już wgrany wcześniej', 409, [
-        existingAttachment.documentId,
-      ])
+    const existingDocumentId = await findDocumentIdByChecksum(checksum)
+    if (existingDocumentId) {
+      throw documentFileConflict(existingDocumentId)
     }
   }
 
@@ -170,6 +170,9 @@ export async function ingestFaXmlDocument(input: IngestFaXmlInput) {
     return { status: 'created' as const, document }
   } catch (error) {
     if (error instanceof DocumentError) throw error
+    if (isPrismaUniqueViolation(error, 'checksum')) {
+      throw documentFileConflict(await findDocumentIdByChecksum(checksum))
+    }
     if (isPrismaUniqueViolation(error)) {
       if (input.ksefNumber) {
         const existing = await prisma.document.findUnique({
