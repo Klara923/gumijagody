@@ -107,9 +107,6 @@ xmlns="http://crd.gov.pl/wzor/2025/06/25/13775/">
 			<Zaplacono>1</Zaplacono>
 			<DataZaplaty>2026-01-27</DataZaplaty>
 			<FormaPlatnosci>6</FormaPlatnosci>
-			<RachunekBankowy>
-				<NrRB>61109010140000071219812874</NrRB>
-			</RachunekBankowy>
 		</Platnosc>
 		<WarunkiTransakcji>
 			<Zamowienia>
