@@ -49,6 +49,16 @@ describe('fieldErrorsFromCaught', () => {
       dueDate: 'Termin płatności nie może być wcześniejszy niż data wystawienia',
     })
   })
+
+  it('puts XML ingest errors on the file field, not unused metadata', () => {
+    const duplicate = 'Dokument o numerze "FV/1" dla tego kontrahenta już istnieje'
+    const dueBeforeIssue = 'Termin płatności nie może być wcześniejszy niż data wystawienia'
+
+    expect(fieldErrorsFromCaught(duplicate, { fromFile: true })).toEqual({ file: duplicate })
+    expect(fieldErrorsFromCaught(dueBeforeIssue, { fromFile: true })).toEqual({
+      file: dueBeforeIssue,
+    })
+  })
 })
 
 describe('updateDocumentBodySchema field errors', () => {

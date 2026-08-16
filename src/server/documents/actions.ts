@@ -217,7 +217,11 @@ export async function uploadDocumentAction(
     return await redirectWithOk('/buffer', 'Wgrano dokument do bufora.')
   } catch (error) {
     if (isRedirectError(error)) throw error
-    return failedDocumentFormState(_prev, formData, fieldErrorsFromCaught(error))
+    return failedDocumentFormState(
+      _prev,
+      formData,
+      fieldErrorsFromCaught(error, isXmlUpload(fileValue) ? { fromFile: true } : undefined),
+    )
   }
 }
 

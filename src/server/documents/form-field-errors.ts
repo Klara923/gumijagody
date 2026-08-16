@@ -64,13 +64,17 @@ export function fieldErrorsFromZod(error: {
   return errors
 }
 
-export function fieldErrorsFromCaught(error: unknown): Record<string, string> {
+export function fieldErrorsFromCaught(
+  error: unknown,
+  options?: { fromFile?: boolean },
+): Record<string, string> {
   const message =
     typeof error === 'string'
       ? error
       : error instanceof Error
         ? error.message
         : 'Nieoczekiwany błąd'
+  if (options?.fromFile) return { file: message }
   if (/numer/i.test(message) && !/plik|xml/i.test(message)) return { number: message }
   if (/typ dokumentu/i.test(message)) return { typeId: message }
   if (/kategori/i.test(message)) return { categoryId: message }

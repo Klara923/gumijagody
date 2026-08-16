@@ -23,7 +23,11 @@ export async function PageShell({
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-8">
-      {shown?.message ? <Flash tone={shown.tone}>{shown.message}</Flash> : null}
+      {shown?.message ? (
+        <Flash key={`${shown.tone ?? 'error'}:${shown.message}`} tone={shown.tone}>
+          {shown.message}
+        </Flash>
+      ) : null}
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0 space-y-2">
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">{title}</h1>
