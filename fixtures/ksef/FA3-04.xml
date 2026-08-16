@@ -71,5 +71,12 @@ xmlns="http://crd.gov.pl/wzor/2025/06/25/13775/">
 			<P_11>1.00</P_11>
 			<P_12>5</P_12>
 		</FaWiersz>
+		<Platnosc>
+			<TerminPlatnosci>2026-05-05</TerminPlatnosci>
+			<FormaPlatnosci>6</FormaPlatnosci>
+			<RachunekBankowy>
+				<NrRB>61109010140000071219812874</NrRB>
+			</RachunekBankowy>
+		</Platnosc>
 	</Fa>
 </Faktura>

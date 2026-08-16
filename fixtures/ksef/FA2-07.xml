@@ -14,6 +14,7 @@
         <Adres>
             <KodKraju>PL</KodKraju>
             <AdresL1>ul. Kwiatowa 1</AdresL1>
+            <AdresL2>00-001 Warszawa</AdresL2>
         </Adres>
     </Podmiot1>
     <Podmiot2>
@@ -24,12 +25,14 @@
         <Adres>
             <KodKraju>PL</KodKraju>
             <AdresL1>ul. Gumijska 1</AdresL1>
+            <AdresL2>34-400 Nowy Targ</AdresL2>
         </Adres>
     </Podmiot2>
     <Fa>
         <KodWaluty>PLN</KodWaluty>
         <P_1>2026-08-12</P_1>
         <P_2>FK/TEST/2026/007</P_2>
+        <P_6>2026-08-26</P_6>
         <P_13_1>80.00</P_13_1>
         <P_14_1>18.40</P_14_1>
         <P_15>98.40</P_15>
@@ -53,5 +56,12 @@
             <P_11>80.00</P_11>
             <P_12>23</P_12>
         </FaWiersz>
+        <Platnosc>
+            <TerminPlatnosci>2026-08-26</TerminPlatnosci>
+            <FormaPlatnosci>6</FormaPlatnosci>
+            <RachunekBankowy>
+                <NrRB>61109010140000071219812874</NrRB>
+            </RachunekBankowy>
+        </Platnosc>
     </Fa>
 </Faktura>

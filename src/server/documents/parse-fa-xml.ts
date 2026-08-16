@@ -156,6 +156,8 @@ export function parseFaXml(xml: string): ParsedFaInvoice {
     ignoreAttributes: false,
     removeNSPrefix: true,
     trimValues: true,
+    // NRB ma 26 cyfr — bez tego fast-xml-parser robi z niego Number i psuje rachunek (6.11e+25).
+    numberParseOptions: { skipLike: /^\d{16,}$/ },
   })
 
   let parsed: unknown

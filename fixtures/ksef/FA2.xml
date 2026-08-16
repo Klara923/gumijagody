@@ -14,6 +14,7 @@
         <Adres>
             <KodKraju>PL</KodKraju>
             <AdresL1>ul. Kwiatowa 1</AdresL1>
+            <AdresL2>00-001 Warszawa</AdresL2>
         </Adres>
         <DaneKontaktowe>
             <Email>example@example.com</Email>
@@ -26,13 +27,15 @@
         </DaneIdentyfikacyjne>
         <Adres>
             <KodKraju>PL</KodKraju>
-            <AdresL1>ulica i numer</AdresL1>
+            <AdresL1>ul. Gumijska 1</AdresL1>
+            <AdresL2>34-400 Nowy Targ</AdresL2>
         </Adres>
     </Podmiot2>
     <Fa>
         <KodWaluty>PLN</KodWaluty>
         <P_1>2023-08-31</P_1>
         <P_2>FK2023/08/31</P_2>
+        <P_6>2023-09-14</P_6>
         <P_13_1>0</P_13_1>
         <P_14_1>0</P_14_1>
         <P_13_2>0</P_13_2>
@@ -79,5 +82,12 @@
             <P_11>3457.35</P_11>
             <P_12>zw</P_12>
         </FaWiersz>
+        <Platnosc>
+            <TerminPlatnosci>2023-09-14</TerminPlatnosci>
+            <FormaPlatnosci>6</FormaPlatnosci>
+            <RachunekBankowy>
+                <NrRB>61109010140000071219812874</NrRB>
+            </RachunekBankowy>
+        </Platnosc>
     </Fa>
 </Faktura>
