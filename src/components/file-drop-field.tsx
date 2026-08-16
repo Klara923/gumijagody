@@ -28,17 +28,25 @@ function assignFile(input: HTMLInputElement, file: File | null) {
   input.files = transfer.files
 }
 
-export function FileDropField({ error: serverError }: { error?: string }) {
+export function FileDropField({
+  error: serverError,
+  errorKey = 0,
+}: {
+  error?: string
+  errorKey?: number
+}) {
   const inputId = useId()
   const hintId = useId()
   const inputRef = useRef<HTMLInputElement>(null)
   const [fileName, setFileName] = useState<string | null>(null)
   const [dragging, setDragging] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [clearedKey, setClearedKey] = useState<number | null>(null)
 
   function applyFile(file: File | null) {
     const input = inputRef.current
     if (!input) return
+    setClearedKey(errorKey)
     if (file && !isAllowedFile(file)) {
       setError('Wybierz plik PDF albo XML.')
       return
@@ -48,7 +56,7 @@ export function FileDropField({ error: serverError }: { error?: string }) {
     setError(null)
   }
 
-  const shownError = error ?? serverError
+  const shownError = error ?? (serverError && clearedKey !== errorKey ? serverError : undefined)
 
   return (
     <div className="grid gap-1 text-sm text-foreground">
@@ -133,7 +141,7 @@ export function FileDropField({ error: serverError }: { error?: string }) {
         </p>
       ) : null}
       {shownError ? (
-        <p className="text-xs text-destructive" role="alert">
+        <p id={hintId} className="text-xs text-destructive" role="alert">
           {shownError}
         </p>
       ) : null}

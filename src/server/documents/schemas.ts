@@ -154,6 +154,16 @@ export const updateDocumentBodySchema = z
     message: 'Podaj co najwyżej jedno z pól: contractorId albo contractor',
     path: ['contractor'],
   })
+  .refine(
+    (body) =>
+      !body.dueDate ||
+      !body.issueDate ||
+      body.dueDate.getTime() >= body.issueDate.getTime(),
+    {
+      message: 'Termin płatności nie może być wcześniejszy niż data wystawienia',
+      path: ['dueDate'],
+    },
+  )
   .superRefine((body, ctx) => {
     const provided = [body.netAmount, body.vatAmount, body.grossAmount].filter(
       (value) => value !== undefined,

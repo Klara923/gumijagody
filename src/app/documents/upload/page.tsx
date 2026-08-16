@@ -1,5 +1,6 @@
 import { UploadDocumentForm } from '@/components/upload-document-form'
-import { Card, PageShell } from '@/components/ui-kit'
+import { PageShell } from '@/components/page-shell'
+import { Card } from '@/components/ui-kit'
 import { listDocumentTypes } from '@/server/document-types/list-document-types'
 
 export default async function UploadDocumentPage() {

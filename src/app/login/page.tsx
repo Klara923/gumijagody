@@ -1,4 +1,5 @@
-import { Card, Field, PageShell, buttonClassName, fieldControlClassName } from '@/components/ui-kit'
+import { PageShell } from '@/components/page-shell'
+import { Card, Field, buttonClassName, fieldControlClassName } from '@/components/ui-kit'
 import { APP_NAME, COMPANY_CONTEXT_LABEL, COMPANY_NAME } from '@/lib/brand'
 import { first } from '@/lib/search-params'
 import { safeInternalPath } from '@/lib/session'

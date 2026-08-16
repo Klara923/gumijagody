@@ -14,8 +14,15 @@ export function Flash({
   const [open, setOpen] = useState(true)
 
   useEffect(() => {
+    setOpen(true)
     const timer = window.setTimeout(() => setOpen(false), 7000)
     return () => window.clearTimeout(timer)
+  }, [children])
+
+  useEffect(() => {
+    const dismiss = () => setOpen(false)
+    document.addEventListener('submit', dismiss)
+    return () => document.removeEventListener('submit', dismiss)
   }, [])
 
   if (!open) return null

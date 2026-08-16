@@ -1,5 +1,5 @@
 import { fieldErrorsFromCaught, fieldErrorsFromZod, valuesFromFormData } from './form-field-errors'
-import { createDocumentBodySchema } from './schemas'
+import { createDocumentBodySchema, updateDocumentBodySchema } from './schemas'
 
 describe('fieldErrorsFromZod', () => {
   it('maps nested contractor paths and amount mismatch to form fields', () => {
@@ -39,6 +39,30 @@ describe('fieldErrorsFromCaught', () => {
     })
     expect(fieldErrorsFromCaught('Brak numeru faktury (P_2) w XML')).toEqual({
       file: 'Brak numeru faktury (P_2) w XML',
+    })
+  })
+
+  it('puts a due-before-issue DocumentError on the dueDate field', () => {
+    expect(
+      fieldErrorsFromCaught('Termin płatności nie może być wcześniejszy niż data wystawienia'),
+    ).toEqual({
+      dueDate: 'Termin płatności nie może być wcześniejszy niż data wystawienia',
+    })
+  })
+})
+
+describe('updateDocumentBodySchema field errors', () => {
+  it('puts a due-before-issue refine on the dueDate field', () => {
+    const parsed = updateDocumentBodySchema.safeParse({
+      issueDate: '2026-08-15',
+      dueDate: '2026-08-01',
+    })
+
+    expect(parsed.success).toBe(false)
+    if (parsed.success) return
+
+    expect(fieldErrorsFromZod(parsed.error)).toEqual({
+      dueDate: 'Termin płatności nie może być wcześniejszy niż data wystawienia',
     })
   })
 })

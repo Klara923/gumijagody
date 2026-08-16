@@ -79,6 +79,7 @@ export function fieldErrorsFromCaught(error: unknown): Record<string, string> {
   if (/nip/i.test(message)) return { contractorNip: message }
   if (/kontrahent/i.test(message)) return { contractorName: message }
   if (/brutto|netto|vat/i.test(message)) return { grossAmount: message }
+  if (/termin płatności/i.test(message)) return { dueDate: message }
   return { form: message }
 }
 

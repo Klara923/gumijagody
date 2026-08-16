@@ -1,7 +1,6 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 
 import { createCategory } from '@/server/categories/create-category'
 import { createKeywordRule } from '@/server/categories/create-keyword-rule'
@@ -18,6 +17,7 @@ import { updateCategory } from '@/server/categories/update-category'
 import { updateKeywordRule } from '@/server/categories/update-keyword-rule'
 import { updateContractorDefaultCategory } from '@/server/contractors/update-default-category'
 import { formString, optionalFormString, redirectWithError } from '@/server/http/form'
+import { redirectWithOk } from '@/server/http/flash'
 
 export async function createCategoryAction(formData: FormData) {
   const raw = {
@@ -27,7 +27,7 @@ export async function createCategoryAction(formData: FormData) {
 
   const parsed = createCategoryBodySchema.safeParse(raw)
   if (!parsed.success) {
-    redirectWithError('/categories', parsed.error.issues[0]?.message ?? 'Nieprawidłowe dane')
+    return await redirectWithError('/categories', parsed.error.issues[0]?.message ?? 'Nieprawidłowe dane')
   }
 
   try {
@@ -35,9 +35,9 @@ export async function createCategoryAction(formData: FormData) {
     revalidatePath('/categories')
     revalidatePath('/contractors')
     revalidatePath('/documents')
-    redirect('/categories?created=1')
+    return await redirectWithOk('/categories', 'Dodano kategorię.')
   } catch (error) {
-    redirectWithError('/categories', error)
+    return await redirectWithError('/categories', error)
   }
 }
 
@@ -53,7 +53,7 @@ export async function updateCategoryAction(formData: FormData) {
 
   const parsed = updateCategoryBodySchema.safeParse(raw)
   if (!parsed.success) {
-    redirectWithError('/categories', parsed.error.issues[0]?.message ?? 'Nieprawidłowe dane')
+    return await redirectWithError('/categories', parsed.error.issues[0]?.message ?? 'Nieprawidłowe dane')
   }
 
   try {
@@ -61,9 +61,9 @@ export async function updateCategoryAction(formData: FormData) {
     revalidatePath('/categories')
     revalidatePath('/contractors')
     revalidatePath('/documents')
-    redirect('/categories?saved=1')
+    return await redirectWithOk('/categories', 'Zapisano kategorię.')
   } catch (error) {
-    redirectWithError('/categories', error)
+    return await redirectWithError('/categories', error)
   }
 }
 
@@ -75,9 +75,9 @@ export async function deleteCategoryAction(formData: FormData) {
     revalidatePath('/categories')
     revalidatePath('/contractors')
     revalidatePath('/documents')
-    redirect('/categories?deleted=1')
+    return await redirectWithOk('/categories', 'Usunięto kategorię.')
   } catch (error) {
-    redirectWithError('/categories', error)
+    return await redirectWithError('/categories', error)
   }
 }
 
@@ -88,7 +88,7 @@ export async function createKeywordRuleAction(formData: FormData) {
     priority: optionalFormString(formData, 'priority') ?? 100,
   })
   if (!parsed.success) {
-    redirectWithError('/categories', parsed.error.issues[0]?.message ?? 'Nieprawidłowe dane')
+    return await redirectWithError('/categories', parsed.error.issues[0]?.message ?? 'Nieprawidłowe dane')
   }
 
   try {
@@ -96,9 +96,9 @@ export async function createKeywordRuleAction(formData: FormData) {
     revalidatePath('/categories')
     revalidatePath('/documents')
     revalidatePath('/buffer')
-    redirect('/categories?ruleCreated=1')
+    return await redirectWithOk('/categories', 'Dodano regułę słowa kluczowego.')
   } catch (error) {
-    redirectWithError('/categories', error)
+    return await redirectWithError('/categories', error)
   }
 }
 
@@ -110,7 +110,7 @@ export async function updateKeywordRuleAction(formData: FormData) {
     priority: optionalFormString(formData, 'priority'),
   })
   if (!parsed.success) {
-    redirectWithError('/categories', parsed.error.issues[0]?.message ?? 'Nieprawidłowe dane')
+    return await redirectWithError('/categories', parsed.error.issues[0]?.message ?? 'Nieprawidłowe dane')
   }
 
   try {
@@ -118,9 +118,9 @@ export async function updateKeywordRuleAction(formData: FormData) {
     revalidatePath('/categories')
     revalidatePath('/documents')
     revalidatePath('/buffer')
-    redirect('/categories?ruleSaved=1')
+    return await redirectWithOk('/categories', 'Zapisano regułę.')
   } catch (error) {
-    redirectWithError('/categories', error)
+    return await redirectWithError('/categories', error)
   }
 }
 
@@ -132,9 +132,9 @@ export async function deleteKeywordRuleAction(formData: FormData) {
     revalidatePath('/categories')
     revalidatePath('/documents')
     revalidatePath('/buffer')
-    redirect('/categories?ruleDeleted=1')
+    return await redirectWithOk('/categories', 'Usunięto regułę.')
   } catch (error) {
-    redirectWithError('/categories', error)
+    return await redirectWithError('/categories', error)
   }
 }
 
@@ -149,7 +149,7 @@ export async function updateContractorDefaultCategoryAction(formData: FormData) 
 
   const parsed = updateContractorDefaultCategoryBodySchema.safeParse(raw)
   if (!parsed.success) {
-    redirectWithError('/contractors', parsed.error.issues[0]?.message ?? 'Nieprawidłowe dane')
+    return await redirectWithError('/contractors', parsed.error.issues[0]?.message ?? 'Nieprawidłowe dane')
   }
 
   try {
@@ -157,8 +157,8 @@ export async function updateContractorDefaultCategoryAction(formData: FormData) 
     revalidatePath('/contractors')
     revalidatePath('/documents')
     revalidatePath('/buffer')
-    redirect('/contractors?saved=1')
+    return await redirectWithOk('/contractors', 'Zapisano regułę.')
   } catch (error) {
-    redirectWithError('/contractors', error)
+    return await redirectWithError('/contractors', error)
   }
 }

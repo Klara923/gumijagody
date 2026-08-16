@@ -98,7 +98,6 @@ test('uploaded FA XML goes through buffer, accept, register, and structured prev
   await page.locator('form#buffer-accept').evaluate((form) => {
     (form as HTMLFormElement).requestSubmit()
   })
-  await page.waitForURL(/\/buffer\?accepted=/)
   await expect(page.getByText('Zaakceptowano wybrane dokumenty.')).toBeVisible()
   await expect(page.locator('tbody tr', { hasText: number })).toHaveCount(0)
 

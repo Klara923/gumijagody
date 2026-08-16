@@ -1,9 +1,9 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 
 import { formString, redirectWithError } from '@/server/http/form'
+import { redirectWithOk } from '@/server/http/flash'
 import { runScheduledKsefImport } from '@/server/schedule/run-scheduled-import'
 import {
   normalizeTimeHhMm,
@@ -33,7 +33,7 @@ export async function updateScheduleSettingsAction(formData: FormData) {
 
   const parsed = updateScheduleSettingsBodySchema.safeParse(raw)
   if (!parsed.success) {
-    redirectWithError(
+    return await redirectWithError(
       '/ksef/schedule',
       parsed.error.issues[0]?.message ?? 'Nieprawidłowe dane harmonogramu',
     )
@@ -43,9 +43,9 @@ export async function updateScheduleSettingsAction(formData: FormData) {
     await updateScheduleSettings(parsed.data)
     revalidatePath('/ksef/schedule')
     revalidatePath('/ksef/import')
-    redirect('/ksef/schedule?saved=1')
+    return await redirectWithOk('/ksef/schedule', 'Zapisano harmonogram.')
   } catch (error) {
-    redirectWithError('/ksef/schedule', error)
+    return await redirectWithError('/ksef/schedule', error)
   }
 }
 
@@ -63,7 +63,7 @@ export async function removeScheduleTimeAction(formData: FormData) {
     runTimes: nextTimes,
   })
   if (!parsed.success) {
-    redirectWithError(
+    return await redirectWithError(
       '/ksef/schedule',
       parsed.error.issues[0]?.message ?? 'Nieprawidłowe dane harmonogramu',
     )
@@ -72,9 +72,9 @@ export async function removeScheduleTimeAction(formData: FormData) {
   try {
     await updateScheduleSettings(parsed.data)
     revalidatePath('/ksef/schedule')
-    redirect('/ksef/schedule?saved=1')
+    return await redirectWithOk('/ksef/schedule', 'Zapisano harmonogram.')
   } catch (error) {
-    redirectWithError('/ksef/schedule', error)
+    return await redirectWithError('/ksef/schedule', error)
   }
 }
 
@@ -87,13 +87,11 @@ export async function runScheduleNowAction() {
 
     const imported = result.results?.reduce((sum, item) => sum + item.importedCount, 0) ?? 0
     const duplicates = result.results?.reduce((sum, item) => sum + item.duplicateCount, 0) ?? 0
-    const params = new URLSearchParams({
-      ran: '1',
-      imported: String(imported),
-      duplicates: String(duplicates),
-    })
-    redirect(`/ksef/schedule?${params.toString()}`)
+    return await redirectWithOk(
+      '/ksef/schedule',
+      `Uruchomiono teraz — zaimportowano ${imported}, duplikaty ${duplicates}.`,
+    )
   } catch (error) {
-    redirectWithError('/ksef/schedule', error)
+    return await redirectWithError('/ksef/schedule', error)
   }
 }

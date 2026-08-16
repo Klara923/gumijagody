@@ -1,7 +1,6 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 
 import { createDocumentType } from '@/server/document-types/create-document-type'
 import { deleteDocumentType } from '@/server/document-types/delete-document-type'
@@ -11,6 +10,7 @@ import {
 } from '@/server/document-types/schemas'
 import { updateDocumentType } from '@/server/document-types/update-document-type'
 import { formString, optionalFormString, redirectWithError } from '@/server/http/form'
+import { redirectWithOk } from '@/server/http/flash'
 
 function revalidateDocumentTypePaths() {
   revalidatePath('/document-types')
@@ -26,15 +26,15 @@ export async function createDocumentTypeAction(formData: FormData) {
     direction: formString(formData, 'direction'),
   })
   if (!parsed.success) {
-    redirectWithError('/document-types', parsed.error.issues[0]?.message ?? 'Nieprawidłowe dane')
+    return await redirectWithError('/document-types', parsed.error.issues[0]?.message ?? 'Nieprawidłowe dane')
   }
 
   try {
     await createDocumentType(parsed.data)
     revalidateDocumentTypePaths()
-    redirect('/document-types?created=1')
+    return await redirectWithOk('/document-types', 'Dodano typ.')
   } catch (error) {
-    redirectWithError('/document-types', error)
+    return await redirectWithError('/document-types', error)
   }
 }
 
@@ -45,15 +45,15 @@ export async function updateDocumentTypeAction(formData: FormData) {
     direction: optionalFormString(formData, 'direction'),
   })
   if (!parsed.success) {
-    redirectWithError('/document-types', parsed.error.issues[0]?.message ?? 'Nieprawidłowe dane')
+    return await redirectWithError('/document-types', parsed.error.issues[0]?.message ?? 'Nieprawidłowe dane')
   }
 
   try {
     await updateDocumentType(id, parsed.data)
     revalidateDocumentTypePaths()
-    redirect('/document-types?saved=1')
+    return await redirectWithOk('/document-types', 'Zapisano typ.')
   } catch (error) {
-    redirectWithError('/document-types', error)
+    return await redirectWithError('/document-types', error)
   }
 }
 
@@ -63,8 +63,8 @@ export async function deleteDocumentTypeAction(formData: FormData) {
   try {
     await deleteDocumentType(id)
     revalidateDocumentTypePaths()
-    redirect('/document-types?deleted=1')
+    return await redirectWithOk('/document-types', 'Usunięto typ.')
   } catch (error) {
-    redirectWithError('/document-types', error)
+    return await redirectWithError('/document-types', error)
   }
 }

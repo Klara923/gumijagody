@@ -1,15 +1,14 @@
 import { CategoryTree } from '@/components/category-tree'
 import { ConfirmDelete } from '@/components/confirm-delete'
+import { PageShell } from '@/components/page-shell'
 import {
   Card,
   CardTitle,
   Field,
-  PageShell,
   buttonClassName,
   buttonSecondaryClassName,
   controlClassName,
 } from '@/components/ui-kit'
-import { first } from '@/lib/search-params'
 import {
   createCategoryAction,
   createKeywordRuleAction,
@@ -19,17 +18,7 @@ import {
 import { listCategoryOptions, listCategoryTree } from '@/server/categories/list-categories'
 import { listKeywordRules } from '@/server/categories/list-keyword-rules'
 
-type SearchParams = Promise<Record<string, string | string[] | undefined>>
-
-export default async function CategoriesPage({ searchParams }: { searchParams: SearchParams }) {
-  const params = await searchParams
-  const error = first(params.error)
-  const created = first(params.created)
-  const saved = first(params.saved)
-  const deleted = first(params.deleted)
-  const ruleCreated = first(params.ruleCreated)
-  const ruleSaved = first(params.ruleSaved)
-  const ruleDeleted = first(params.ruleDeleted)
+export default async function CategoriesPage() {
   const tree = await listCategoryTree()
   const options = await listCategoryOptions()
   const keywordRules = await listKeywordRules()
@@ -38,23 +27,6 @@ export default async function CategoriesPage({ searchParams }: { searchParams: S
     <PageShell
       title="Kategorie kosztów"
       description="Drzewo kategorii oraz reguły ze słów kluczowych. Kontrahent → kategoria ma pierwszeństwo (strona Kontrahenci)."
-      flash={
-        error
-          ? { message: error }
-          : created
-            ? { tone: 'ok', message: 'Dodano kategorię.' }
-            : saved
-              ? { tone: 'ok', message: 'Zapisano kategorię.' }
-              : deleted
-                ? { tone: 'ok', message: 'Usunięto kategorię.' }
-                : ruleCreated
-                  ? { tone: 'ok', message: 'Dodano regułę słowa kluczowego.' }
-                  : ruleSaved
-                    ? { tone: 'ok', message: 'Zapisano regułę.' }
-                    : ruleDeleted
-                      ? { tone: 'ok', message: 'Usunięto regułę.' }
-                      : null
-      }
     >
 
       <Card>

@@ -1,7 +1,7 @@
+import { PageShell } from '@/components/page-shell'
 import {
   Card,
   EmptyState,
-  PageShell,
   buttonClassName,
   controlClassName,
   tableClassName,
@@ -9,17 +9,11 @@ import {
   thClassName,
   trClassName,
 } from '@/components/ui-kit'
-import { first } from '@/lib/search-params'
 import { updateContractorDefaultCategoryAction } from '@/server/categories/actions'
 import { listCategoryOptions } from '@/server/categories/list-categories'
 import { listContractors } from '@/server/contractors/list-contractors'
 
-type SearchParams = Promise<Record<string, string | string[] | undefined>>
-
-export default async function ContractorsPage({ searchParams }: { searchParams: SearchParams }) {
-  const params = await searchParams
-  const error = first(params.error)
-  const saved = first(params.saved)
+export default async function ContractorsPage() {
   const contractors = await listContractors()
   const categories = await listCategoryOptions()
 
@@ -27,9 +21,6 @@ export default async function ContractorsPage({ searchParams }: { searchParams: 
     <PageShell
       title="Kontrahenci — reguła kategorii"
       description="Domyślna kategoria ma pierwszeństwo przed słowami kluczowymi. Przy uploadzie i imporcie KSeF dokument dostanie ją automatycznie."
-      flash={
-        error ? { message: error } : saved ? { tone: 'ok', message: 'Zapisano regułę.' } : null
-      }
     >
       {contractors.length === 0 ? (
         <EmptyState

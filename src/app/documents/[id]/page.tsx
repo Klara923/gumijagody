@@ -3,16 +3,15 @@ import { notFound } from 'next/navigation'
 
 import { ConfirmDelete } from '@/components/confirm-delete'
 import { EditDocumentForm } from '@/components/edit-document-form'
+import { PageShell } from '@/components/page-shell'
 import {
   Card,
   EnumBadge,
-  PageShell,
   buttonClassName,
   buttonSecondaryClassName,
   controlClassName,
 } from '@/components/ui-kit'
 import { DOCUMENT_SOURCE, DOCUMENT_STAGE } from '@/lib/labels'
-import { first } from '@/lib/search-params'
 import { listCategoryOptions } from '@/server/categories/list-categories'
 import { listDocumentTypes } from '@/server/document-types/list-document-types'
 import { assignDocumentCategoryAction, deleteDocumentAction } from '@/server/documents/actions'
@@ -20,20 +19,10 @@ import { DocumentError } from '@/server/documents/errors'
 import { getDocumentById } from '@/server/documents/get-document'
 import { MUTABLE_DOCUMENT_SOURCES } from '@/server/documents/policy'
 
-type SearchParams = Promise<Record<string, string | string[] | undefined>>
 type RouteParams = Promise<{ id: string }>
 
-export default async function DocumentDetailPage({
-  params,
-  searchParams,
-}: {
-  params: RouteParams
-  searchParams: SearchParams
-}) {
+export default async function DocumentDetailPage({ params }: { params: RouteParams }) {
   const { id } = await params
-  const query = await searchParams
-  const error = first(query.error)
-  const saved = first(query.saved)
 
   let document
   try {
@@ -57,7 +46,6 @@ export default async function DocumentDetailPage({
           <EnumBadge value={document.source} labels={DOCUMENT_SOURCE} />
         </div>
       }
-      flash={saved ? { tone: 'ok', message: 'Zapisano.' } : error ? { message: error } : null}
       actions={
         <>
           <Link href={backHref} className={buttonSecondaryClassName}>

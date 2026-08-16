@@ -16,7 +16,7 @@ export function UploadDocumentForm({ types }: { types: Array<{ id: string; label
 
   return (
     <form action={action} className="grid gap-4">
-      <FileDropField error={errors.file} />
+      <FileDropField error={errors.file} errorKey={state.attempt} />
 
       <fieldset key={state.attempt} className="grid gap-3 rounded-lg border border-border p-3">
         <legend className="px-1 text-sm font-medium text-foreground">Metadane (wymagane dla PDF)</legend>

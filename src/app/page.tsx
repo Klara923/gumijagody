@@ -1,6 +1,7 @@
 import Link from 'next/link'
 
-import { Card, PageShell, buttonClassName, buttonSecondaryClassName } from '@/components/ui-kit'
+import { PageShell } from '@/components/page-shell'
+import { Card, buttonClassName, buttonSecondaryClassName } from '@/components/ui-kit'
 import { APP_NAME, COMPANY_CONTEXT_LABEL, COMPANY_NAME } from '@/lib/brand'
 
 const flow = [

@@ -2,20 +2,7 @@ export function first(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value
 }
 
-const OMIT_FROM_PAGE_LINKS = new Set([
-  'error',
-  'accepted',
-  'uploaded',
-  'saved',
-  'created',
-  'deleted',
-  'ran',
-  'imported',
-  'duplicates',
-  'found',
-  'importError',
-  'page',
-])
+const OMIT_FROM_PAGE_LINKS = new Set(['imported', 'duplicates', 'found', 'importError', 'page'])
 
 export function hrefWithPage(
   pathname: string,

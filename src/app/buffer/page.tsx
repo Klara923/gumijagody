@@ -3,12 +3,12 @@ import Link from 'next/link'
 import { ConfirmAccept } from '@/components/confirm-accept'
 import { PreviewButton } from '@/components/document-preview-drawer'
 import { ListPagination } from '@/components/list-pagination'
+import { PageShell } from '@/components/page-shell'
 import { SelectAllCheckbox } from '@/components/select-all-checkbox'
 import {
   Card,
   EmptyState,
   EnumBadge,
-  PageShell,
   buttonClassName,
   buttonSecondaryClassName,
   tableClassName,
@@ -27,9 +27,6 @@ type SearchParams = Promise<Record<string, string | string[] | undefined>>
 
 export default async function BufferPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams
-  const error = first(params.error)
-  const accepted = first(params.accepted)
-  const uploaded = first(params.uploaded)
   const parsed = listDocumentsQuerySchema.safeParse({
     stage: 'BUFFER',
     sortBy: 'issueDate',
@@ -43,19 +40,10 @@ export default async function BufferPage({ searchParams }: { searchParams: Searc
   )
   const items = listed.items
 
-  const flash = error
-    ? { tone: 'error' as const, message: error }
-    : accepted
-      ? { tone: 'ok' as const, message: 'Zaakceptowano wybrane dokumenty.' }
-      : uploaded
-        ? { tone: 'ok' as const, message: 'Wgrano dokument do bufora.' }
-        : null
-
   return (
     <PageShell
       title="Bufor"
       description="Dokumenty oczekujące na akceptację przed przeniesieniem do rejestru."
-      flash={flash}
       actions={
         <>
           <Link href="/documents/upload" className={buttonSecondaryClassName}>

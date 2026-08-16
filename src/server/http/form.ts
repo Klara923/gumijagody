@@ -1,5 +1,6 @@
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
-import { redirect } from 'next/navigation'
+
+import { redirectWithFlash } from '@/server/http/flash'
 
 export function formString(formData: FormData, key: string) {
   const value = formData.get(key)
@@ -17,7 +18,7 @@ export function errorMessage(error: unknown) {
   return 'Nieoczekiwany błąd'
 }
 
-export function redirectWithError(path: string, error: unknown): never {
+export async function redirectWithError(path: string, error: unknown): Promise<never> {
   if (isRedirectError(error)) throw error
-  redirect(`${path}?error=${encodeURIComponent(errorMessage(error))}`)
+  return redirectWithFlash(path, { tone: 'error', message: errorMessage(error) })
 }

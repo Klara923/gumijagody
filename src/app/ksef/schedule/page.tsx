@@ -1,12 +1,12 @@
 import Link from 'next/link'
 
 import { ConfirmDelete } from '@/components/confirm-delete'
+import { PageShell } from '@/components/page-shell'
 import {
   Card,
   CardTitle,
   EnumBadge,
   Field,
-  PageShell,
   buttonClassName,
   buttonSecondaryClassName,
   controlClassName,
@@ -16,7 +16,6 @@ import {
   trClassName,
 } from '@/components/ui-kit'
 import { IMPORT_STATUS, INVOICE_KIND } from '@/lib/labels'
-import { first } from '@/lib/search-params'
 import {
   removeScheduleTimeAction,
   runScheduleNowAction,
@@ -25,16 +24,7 @@ import {
 import { listImportRuns } from '@/server/schedule/list-import-runs'
 import { getScheduleSettings } from '@/server/schedule/settings'
 
-type SearchParams = Promise<Record<string, string | string[] | undefined>>
-
-export default async function KsefSchedulePage({ searchParams }: { searchParams: SearchParams }) {
-  const params = await searchParams
-  const error = first(params.error)
-  const saved = first(params.saved)
-  const ran = first(params.ran)
-  const imported = first(params.imported)
-  const duplicates = first(params.duplicates)
-
+export default async function KsefSchedulePage() {
   const settings = await getScheduleSettings()
   const recentRuns = await listImportRuns()
 
@@ -42,18 +32,6 @@ export default async function KsefSchedulePage({ searchParams }: { searchParams:
     <PageShell
       title="Harmonogram KSeF"
       description="Wiele godzin na dobę. Lokalnie node-cron sprawdza minutę. Na Vercel Hobby cron woła raz na dobę — dodatkowe godziny ustawisz przez cron-job.org na POST /api/cron/ksef."
-      flash={
-        error
-          ? { message: error }
-          : saved
-            ? { tone: 'ok', message: 'Zapisano harmonogram.' }
-            : ran
-              ? {
-                  tone: 'ok',
-                  message: `Uruchomiono teraz — zaimportowano ${imported ?? '0'}, duplikaty ${duplicates ?? '0'}.`,
-                }
-              : null
-      }
       actions={
         <Link href="/ksef/import" className={buttonSecondaryClassName}>
           Ręczny import

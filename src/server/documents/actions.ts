@@ -25,6 +25,7 @@ import {
 import { updateDocument } from '@/server/documents/update-document'
 import { uploadDocument } from '@/server/documents/upload-document'
 import { formString, optionalFormString, redirectWithError } from '@/server/http/form'
+import { redirectWithOk } from '@/server/http/flash'
 
 export type { DocumentFormState }
 
@@ -108,7 +109,7 @@ export async function updateDocumentAction(
     revalidatePath('/documents')
     revalidatePath('/buffer')
     revalidatePath(`/documents/${id}`)
-    redirect(`/documents/${id}?saved=1`)
+    return await redirectWithOk(`/documents/${id}`, 'Zapisano.')
   } catch (error) {
     if (isRedirectError(error)) throw error
     return failedDocumentFormState(_prev, formData, fieldErrorsFromCaught(error))
@@ -127,9 +128,9 @@ export async function assignDocumentCategoryAction(formData: FormData) {
     revalidatePath('/documents')
     revalidatePath('/buffer')
     revalidatePath(`/documents/${id}`)
-    redirect(`/documents/${id}?saved=1`)
+    return await redirectWithOk(`/documents/${id}`, 'Zapisano.')
   } catch (error) {
-    redirectWithError(`/documents/${id}`, error)
+    return await redirectWithError(`/documents/${id}`, error)
   }
 }
 
@@ -142,7 +143,7 @@ export async function deleteDocumentAction(formData: FormData) {
     revalidatePath('/buffer')
     redirect('/documents')
   } catch (error) {
-    redirectWithError(`/documents/${id}`, error)
+    return await redirectWithError(`/documents/${id}`, error)
   }
 }
 
@@ -153,16 +154,16 @@ export async function acceptDocumentsAction(formData: FormData) {
 
   const parsed = acceptDocumentsBodySchema.safeParse({ ids })
   if (!parsed.success) {
-    redirectWithError('/buffer', parsed.error.issues[0]?.message ?? 'Nieprawidłowe dane')
+    return await redirectWithError('/buffer', parsed.error.issues[0]?.message ?? 'Nieprawidłowe dane')
   }
 
   try {
     await acceptDocuments(parsed.data)
     revalidatePath('/documents')
     revalidatePath('/buffer')
-    redirect('/buffer?accepted=1')
+    return await redirectWithOk('/buffer', 'Zaakceptowano wybrane dokumenty.')
   } catch (error) {
-    redirectWithError('/buffer', error)
+    return await redirectWithError('/buffer', error)
   }
 }
 
@@ -203,7 +204,7 @@ export async function uploadDocumentAction(
   }
 
   try {
-    const document = await uploadDocument(
+    await uploadDocument(
       {
         filename: fileValue.name,
         mimeType: fileValue.type || 'application/octet-stream',
@@ -213,7 +214,7 @@ export async function uploadDocumentAction(
     )
     revalidatePath('/documents')
     revalidatePath('/buffer')
-    redirect(`/buffer?uploaded=${encodeURIComponent(document.id)}`)
+    return await redirectWithOk('/buffer', 'Wgrano dokument do bufora.')
   } catch (error) {
     if (isRedirectError(error)) throw error
     return failedDocumentFormState(_prev, formData, fieldErrorsFromCaught(error))
@@ -229,7 +230,7 @@ export async function importFromKsefAction(formData: FormData) {
 
   const parsed = importFromKsefBodySchema.safeParse(raw)
   if (!parsed.success) {
-    redirectWithError(
+    return await redirectWithError(
       '/ksef/import',
       parsed.error.issues[0]?.message ?? 'Nieprawidłowe dane',
     )
@@ -247,6 +248,6 @@ export async function importFromKsefAction(formData: FormData) {
     if (result.error) params.set('importError', result.error.slice(0, 500))
     redirect(`/ksef/import?${params.toString()}`)
   } catch (error) {
-    redirectWithError('/ksef/import', error)
+    return await redirectWithError('/ksef/import', error)
   }
 }

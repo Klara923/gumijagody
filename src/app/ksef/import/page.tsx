@@ -1,6 +1,7 @@
 import Link from 'next/link'
 
-import { Card, Field, PageShell, buttonClassName, buttonSecondaryClassName, controlClassName } from '@/components/ui-kit'
+import { PageShell } from '@/components/page-shell'
+import { Card, Field, buttonClassName, buttonSecondaryClassName, controlClassName } from '@/components/ui-kit'
 import { first } from '@/lib/search-params'
 import { importFromKsefAction } from '@/server/documents/actions'
 import { KSEF_DEMO_INVOICE_LIMIT } from '@/server/infrastructure/ksef/limits'
@@ -19,22 +20,19 @@ function daysAgoIso(days: number): string {
 
 export default async function KsefImportPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams
-  const error = first(params.error)
   const imported = first(params.imported)
   const duplicates = first(params.duplicates)
   const found = first(params.found)
   const importError = first(params.importError)
 
-  const flash = error
-    ? { tone: 'error' as const, message: error }
-    : importError
-      ? { tone: 'error' as const, message: importError }
-      : imported !== undefined
-        ? {
-            tone: 'ok' as const,
-            message: `Znaleziono ${found ?? '?'}, zaimportowano ${imported}, duplikaty ${duplicates ?? '0'}.`,
-          }
-        : null
+  const flash = importError
+    ? { tone: 'error' as const, message: importError }
+    : imported !== undefined
+      ? {
+          tone: 'ok' as const,
+          message: `Znaleziono ${found ?? '?'}, zaimportowano ${imported}, duplikaty ${duplicates ?? '0'}.`,
+        }
+      : null
 
   return (
     <PageShell

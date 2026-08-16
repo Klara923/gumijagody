@@ -1,10 +1,10 @@
 import { ConfirmDelete } from '@/components/confirm-delete'
+import { PageShell } from '@/components/page-shell'
 import {
   Card,
   CardTitle,
   EnumBadge,
   Field,
-  PageShell,
   buttonClassName,
   controlClassName,
   tableClassName,
@@ -13,7 +13,6 @@ import {
   trClassName,
 } from '@/components/ui-kit'
 import { DOCUMENT_DIRECTION } from '@/lib/labels'
-import { first } from '@/lib/search-params'
 import {
   createDocumentTypeAction,
   deleteDocumentTypeAction,
@@ -21,31 +20,13 @@ import {
 } from '@/server/document-types/actions'
 import { listDocumentTypes } from '@/server/document-types/list-document-types'
 
-type SearchParams = Promise<Record<string, string | string[] | undefined>>
-
-export default async function DocumentTypesPage({ searchParams }: { searchParams: SearchParams }) {
-  const params = await searchParams
-  const error = first(params.error)
-  const created = first(params.created)
-  const saved = first(params.saved)
-  const deleted = first(params.deleted)
+export default async function DocumentTypesPage() {
   const types = await listDocumentTypes()
 
   return (
     <PageShell
       title="Typy dokumentów"
       description="Typ systemowy ma kierunek należność albo zobowiązanie. Własne typy (nota obciążeniowa, odsetkowa, karna) dodajesz tutaj i wybierasz na dokumencie."
-      flash={
-        error
-          ? { message: error }
-          : created
-            ? { tone: 'ok', message: 'Dodano typ.' }
-            : saved
-              ? { tone: 'ok', message: 'Zapisano typ.' }
-              : deleted
-                ? { tone: 'ok', message: 'Usunięto typ.' }
-                : null
-      }
     >
 
       <Card>

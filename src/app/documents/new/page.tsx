@@ -1,5 +1,6 @@
 import { NewDocumentForm } from '@/components/new-document-form'
-import { Card, PageShell } from '@/components/ui-kit'
+import { PageShell } from '@/components/page-shell'
+import { Card } from '@/components/ui-kit'
 import { listCategoryOptions } from '@/server/categories/list-categories'
 import { listDocumentTypes } from '@/server/document-types/list-document-types'
 
