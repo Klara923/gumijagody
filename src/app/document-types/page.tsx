@@ -1,3 +1,5 @@
+import type { Metadata } from 'next'
+
 import { ConfirmDelete } from '@/components/confirm-delete'
 import { PageShell } from '@/components/page-shell'
 import {
@@ -19,6 +21,8 @@ import {
   updateDocumentTypeAction,
 } from '@/server/document-types/actions'
 import { listDocumentTypes } from '@/server/document-types/list-document-types'
+
+export const metadata: Metadata = { title: 'Typy dokumentów' }
 
 export default async function DocumentTypesPage() {
   const types = await listDocumentTypes()

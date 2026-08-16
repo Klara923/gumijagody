@@ -1,8 +1,12 @@
+import type { Metadata } from 'next'
+
 import { NewDocumentForm } from '@/components/new-document-form'
 import { PageShell } from '@/components/page-shell'
 import { Card } from '@/components/ui-kit'
 import { listCategoryOptions } from '@/server/categories/list-categories'
 import { listDocumentTypes } from '@/server/document-types/list-document-types'
+
+export const metadata: Metadata = { title: 'Wpis ręczny' }
 
 export default async function NewDocumentPage() {
   const types = await listDocumentTypes()

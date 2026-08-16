@@ -1,9 +1,11 @@
+import { cache } from 'react'
+
 import { getPrisma } from '@/server/infrastructure/db/prisma'
 
 import { DocumentError } from './errors'
 import { DOCUMENT_INCLUDE, mapDocument } from './mapper'
 
-export async function getDocumentById(id: string) {
+export const getDocumentById = cache(async function getDocumentById(id: string) {
   const document = await getPrisma().document.findUnique({
     where: { id },
     include: DOCUMENT_INCLUDE,
@@ -14,4 +16,4 @@ export async function getDocumentById(id: string) {
   }
 
   return mapDocument(document)
-}
+})

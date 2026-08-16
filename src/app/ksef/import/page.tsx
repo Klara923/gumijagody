@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 
 import { PageShell } from '@/components/page-shell'
@@ -7,6 +8,8 @@ import { importFromKsefAction } from '@/server/documents/actions'
 import { KSEF_DEMO_INVOICE_LIMIT } from '@/server/infrastructure/ksef/limits'
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>
+
+export const metadata: Metadata = { title: 'Pobieranie z KSeF' }
 
 function todayIso(): string {
   return new Date().toISOString().slice(0, 10)

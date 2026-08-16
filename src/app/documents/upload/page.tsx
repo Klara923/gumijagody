@@ -1,7 +1,11 @@
+import type { Metadata } from 'next'
+
 import { UploadDocumentForm } from '@/components/upload-document-form'
 import { PageShell } from '@/components/page-shell'
 import { Card } from '@/components/ui-kit'
 import { listDocumentTypes } from '@/server/document-types/list-document-types'
+
+export const metadata: Metadata = { title: 'Wgraj PDF / XML' }
 
 export default async function UploadDocumentPage() {
   const types = await listDocumentTypes()

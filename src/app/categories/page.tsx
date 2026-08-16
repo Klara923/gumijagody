@@ -1,3 +1,5 @@
+import type { Metadata } from 'next'
+
 import { CategoryTree } from '@/components/category-tree'
 import { ConfirmDelete } from '@/components/confirm-delete'
 import { PageShell } from '@/components/page-shell'
@@ -17,6 +19,8 @@ import {
 } from '@/server/categories/actions'
 import { listCategoryOptions, listCategoryTree } from '@/server/categories/list-categories'
 import { listKeywordRules } from '@/server/categories/list-keyword-rules'
+
+export const metadata: Metadata = { title: 'Kategorie' }
 
 export default async function CategoriesPage() {
   const tree = await listCategoryTree()

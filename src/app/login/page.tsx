@@ -1,3 +1,5 @@
+import type { Metadata } from 'next'
+
 import { PageShell } from '@/components/page-shell'
 import { Card, Field, buttonClassName, fieldControlClassName } from '@/components/ui-kit'
 import { APP_NAME, COMPANY_CONTEXT_LABEL, COMPANY_NAME } from '@/lib/brand'
@@ -6,6 +8,8 @@ import { safeInternalPath } from '@/lib/session'
 import { loginAction } from '@/server/auth/actions'
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>
+
+export const metadata: Metadata = { title: 'Logowanie' }
 
 export default async function LoginPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams

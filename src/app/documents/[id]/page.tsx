@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
@@ -20,6 +21,16 @@ import { getDocumentById } from '@/server/documents/get-document'
 import { MUTABLE_DOCUMENT_SOURCES } from '@/server/documents/policy'
 
 type RouteParams = Promise<{ id: string }>
+
+export async function generateMetadata({ params }: { params: RouteParams }): Promise<Metadata> {
+  const { id } = await params
+  try {
+    const document = await getDocumentById(id)
+    return { title: document.number }
+  } catch {
+    return { title: 'Dokument' }
+  }
+}
 
 export default async function DocumentDetailPage({ params }: { params: RouteParams }) {
   const { id } = await params

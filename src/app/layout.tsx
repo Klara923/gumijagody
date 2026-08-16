@@ -17,7 +17,11 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: `${APP_NAME} — ewidencja faktur`,
+  applicationName: APP_NAME,
+  title: {
+    default: `${APP_NAME} — ewidencja faktur`,
+    template: `%s · ${APP_NAME}`,
+  },
   description:
     'Ewidencja faktur kosztowych i sprzedażowych: pobieranie z KSeF, bufor, kategoryzacja i podgląd dokumentów.',
 }

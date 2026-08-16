@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
@@ -6,9 +7,20 @@ import { PageShell } from '@/components/page-shell'
 import { EnumBadge, buttonSecondaryClassName } from '@/components/ui-kit'
 import { DOCUMENT_SOURCE, DOCUMENT_STAGE } from '@/lib/labels'
 import { DocumentError } from '@/server/documents/errors'
+import { getDocumentById } from '@/server/documents/get-document'
 import { getDocumentPreview } from '@/server/documents/get-document-preview'
 
 type RouteParams = Promise<{ id: string }>
+
+export async function generateMetadata({ params }: { params: RouteParams }): Promise<Metadata> {
+  const { id } = await params
+  try {
+    const document = await getDocumentById(id)
+    return { title: `Podgląd: ${document.number}` }
+  } catch {
+    return { title: 'Podgląd' }
+  }
+}
 
 export default async function DocumentPreviewPage({ params }: { params: RouteParams }) {
   const { id } = await params

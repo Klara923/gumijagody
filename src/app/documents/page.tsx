@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 
 import { RegisterColumnsTable } from '@/components/register-columns-table'
@@ -13,6 +14,8 @@ import { listDocumentsQuerySchema } from '@/server/documents/schemas'
 import { getRegisterVisibleColumns } from '@/server/table-preferences/get-table-preference'
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>
+
+export const metadata: Metadata = { title: 'Rejestr dokumentów' }
 
 export default async function DocumentsPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams

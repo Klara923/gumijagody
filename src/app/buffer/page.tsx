@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 
 import { ConfirmAccept } from '@/components/confirm-accept'
@@ -24,6 +25,8 @@ import { listDocuments } from '@/server/documents/list-documents'
 import { listDocumentsQuerySchema } from '@/server/documents/schemas'
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>
+
+export const metadata: Metadata = { title: 'Bufor' }
 
 export default async function BufferPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams

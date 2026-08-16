@@ -1,3 +1,5 @@
+import type { Metadata } from 'next'
+
 import { PageShell } from '@/components/page-shell'
 import {
   Card,
@@ -12,6 +14,8 @@ import {
 import { updateContractorDefaultCategoryAction } from '@/server/categories/actions'
 import { listCategoryOptions } from '@/server/categories/list-categories'
 import { listContractors } from '@/server/contractors/list-contractors'
+
+export const metadata: Metadata = { title: 'Kontrahenci' }
 
 export default async function ContractorsPage() {
   const contractors = await listContractors()

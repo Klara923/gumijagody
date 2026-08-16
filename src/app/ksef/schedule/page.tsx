@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 
 import { ConfirmDelete } from '@/components/confirm-delete'
@@ -23,6 +24,8 @@ import {
 } from '@/server/schedule/actions'
 import { listImportRuns } from '@/server/schedule/list-import-runs'
 import { getScheduleSettings } from '@/server/schedule/settings'
+
+export const metadata: Metadata = { title: 'Harmonogram KSeF' }
 
 export default async function KsefSchedulePage() {
   const settings = await getScheduleSettings()
