@@ -43,10 +43,6 @@ KSeF schowałam za interfejsem (`mock` albo `http` w `src/server/infrastructure/
 
 XML FA(2)/FA(3) sam wypełnia pola. PDF wymaga metadanych, plik zostaje załącznikiem. Kategoria: najpierw to co ktoś wybierze ręcznie, potem domyślna z kontrahenta, na końcu słowo kluczowe.
 
-## Research
-
-Patrzyłam na Aplikację Podatnika KSeF i na takie rzeczy jak wFirma / inFakt — wszędzie jest poczekalnia i dopiero potem rejestr, nie od razu księgowanie. Tę kolejkę (bufor → akceptacja) wzięłam. Nie robię dekretacji ani JPK, bo to było poza zakresem; tu chodzi o ogarnięcie dokumentów, a nie o pełną księgowość.
-
 ## Założenia
 
 - Przy XML kierunek (koszt / sprzedaż) biorę z tego, czy `KSEF_NIP` jest nabywcą czy sprzedawcą.
