@@ -25,7 +25,7 @@ function continueRequest(request: NextRequest) {
   return response
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const password = process.env.APP_PASSWORD
   if (!password) return continueRequest(request)
 
