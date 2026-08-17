@@ -43,6 +43,12 @@ KSeF schowałam za interfejsem (`mock` albo `http` w `src/server/infrastructure/
 
 XML FA(2)/FA(3) sam wypełnia pola. PDF wymaga metadanych, plik zostaje załącznikiem. Kategoria: najpierw to co ktoś wybierze ręcznie, potem domyślna z kontrahenta, na końcu słowo kluczowe.
 
+## Research
+
+Patrzyłam na Fakturownię. Podgląd jest dopiero po wejściu w dokument (klik w numer) — schodzisz z listy na osobną stronę; na liście nie ma szybkiego podglądu. U mnie z listy otwiera się szuflada, bez zmiany strony; pełny ekran zostaje jako opcja.
+
+Fakturownia dzieli dokumenty w menu na Przychody i Wydatki. U mnie jest jeden Rejestr i filtr typu (kosztowa / sprzedażowa). Rozdzielenie tych kierunków już w navbarze można rozważyć później; do ewidencji z briefu wystarcza wspólna lista.
+
 ## Założenia
 
 - Przy XML kierunek (koszt / sprzedaż) biorę z tego, czy `KSEF_NIP` jest nabywcą czy sprzedawcą.
